@@ -1,17 +1,22 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <sandbox>
+    <Vue3Tree />
+  </sandbox>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { Sandbox } from "component-fixture";
+import "font-awesome/css/font-awesome.css";
+import "component-fixture/dist/ComponentFixture.css";
+import Vue3Tree from "@/components/Vue3TreeComponent.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Sandbox,
+    Vue3Tree,
+  },
+};
 </script>
 
 <style>

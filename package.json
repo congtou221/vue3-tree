@@ -1,12 +1,24 @@
 {
   "name": "vue3-tree",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "serve": "vue-cli-service serve ./example/main.js --open",
+    "build": "vue-cli-service build --name vue3-tree --entry ./src/index.js --target lib",
+    "lint": "vue-cli-service lint",
+    "doc:build": "npx vuedoc.md --section API --output ./README.md ./src/components/Vue3Tree.vue",
+    "prepublishOnly": "npm run lint && npm run build && npm run styleguide:build && npm run doc:build",
+    "styleguide": "vue-styleguidist server",
+    "styleguide:build": "vue-styleguidist build"
   },
+  "main": "dist/vue3-tree.umd.js",
+  "module": "dist/vue3-tree.common.min.js",
+  "files": [
+    "dist/*.css",
+    "dist/*.map",
+    "dist/*.js",
+    "src/*"
+  ],
   "dependencies": {
     "core-js": "^3.8.3",
     "vue": "^3.2.13"
@@ -14,11 +26,26 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@typescript-eslint/eslint-plugin": "4.0.0",
+    "@typescript-eslint/parser": "4.0.0",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "@vuedoc/md": "^1.5.0",
+    "component-fixture": "^1.12.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3"
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-vue": "^8.7.1",
+    "less-loader": "^12.2.0",
+    "prettier": "^3.2.5",
+    "prettier-eslint-cli": "^8.0.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "3.9.4",
+    "vue-cli-plugin-component": "^1.12.2",
+    "vue-styleguidist": "^1.7.13",
+    "vue-template-compiler": "^2.7.16"
   },
   "eslintConfig": {
     "root": true,
@@ -39,5 +66,14 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "keywords": [
+    "vue",
+    "component"
+  ],
+  "license": "ISC",
+  "resolutions": {
+    "@types/express-serve-static-core": "4.17.0",
+    "component-fixture": "1.0.0"
+  }
 }
