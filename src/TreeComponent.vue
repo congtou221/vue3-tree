@@ -9,7 +9,9 @@
     >
       <div
         class="vtl-border vtl-up"
-        :class="{ 'vtl-active': isDragEnterUp }"
+        :class="{
+          'vtl-active': isDragEnterUp,
+        }"
         @drop="dropBefore"
         @dragenter="dragEnterUp"
         @dragover="dragOverUp"
@@ -62,7 +64,10 @@
           @blur="setUnEditable"
           @keyup.enter="setUnEditable"
         />
-        <div v-show="isHover" class="vtl-operation">
+        <div
+          class="vtl-operation"
+          v-show="isHover || model.id === store.activatedKey || showMenuCard"
+        >
           <!-- <span
             v-if="!model.addTreeNodeDisabled"
             :title="defaultAddTreeNodeTitle"
@@ -92,7 +97,27 @@
           </span>
         </div>
       </div>
+      <div v-if="showMenuCard" ref="menuCard" class="vtl-actived-menu">
+        <div
+          v-if="!model.editNodeDisabled"
+          title="edit"
+          @click.stop.prevent="setEditable"
+        >
+          <slot name="editNodeIcon" :expanded="expanded" :model="model">
+            <i class="vtl-icon vtl-icon-edit" /> 重命名
+          </slot>
+        </div>
 
+        <div
+          v-if="!model.delNodeDisabled"
+          title="delete"
+          @click.stop.prevent="delNode"
+        >
+          <slot name="delNodeIcon" :expanded="expanded" :model="model">
+            <i class="vtl-icon vtl-icon-trash" /> 删除
+          </slot>
+        </div>
+      </div>
       <div
         v-if="model.children && model.children.length > 0 && expanded"
         class="vtl-border vtl-bottom"
@@ -201,9 +226,10 @@ const isDragEnterBottom = ref(false);
 const isDragEnterNode = ref(false);
 const expanded = ref(props.defaultExpanded);
 const model = reactive(props.model);
-const key = ref(props.key);
 // 定义一个ref来引用DOM元素
 const menuCard = ref(null);
+const showActiveStyle = ref(false);
+const showMenuCard = ref(false);
 
 // // 将一些操作封装成计算属性以提高代码复用性和可读性
 // const rootNode = computed(() => {
@@ -226,11 +252,14 @@ const treeNodeClass = computed(() => {
   const {
     model: { dragDisabled, disabled },
   } = props;
+  console.log("vtl-selected3", model.id, store.activatedKey);
+
   return {
     "vtl-node-main": true,
     "vtl-active": isDragEnterNode.value,
     "vtl-drag-disabled": dragDisabled,
     "vtl-disabled": disabled,
+    "vtl-selected": showActiveStyle.value,
   };
 });
 
@@ -300,7 +329,23 @@ const click = () => {
     toggle: props.toggle,
     ...props.model,
   });
+  store.setActivatedKey(model.id);
+  console.log("vtl-selected1", model.id, store.activatedKey);
 };
+
+watchEffect(
+  () =>
+    (showActiveStyle.value =
+      !(model.disabled || model.dragDisabled) &&
+      model.id === store.activatedKey)
+);
+
+watchEffect(
+  () =>
+    (showMenuCard.value =
+      !(model.disabled || model.dragDisabled) &&
+      model.id === store.showMenuCardId)
+);
 
 const addChild = (isLeaf) => {
   const name = isLeaf ? props.defaultLeafNodeName : props.defaultTreeNodeName;
@@ -308,7 +353,6 @@ const addChild = (isLeaf) => {
   var node = new TreeNode({ name, isLeaf });
   props.model.addChildren(node, true);
   eventBus.emit("add-node", node);
-  store.setActivatedKey(key.value);
 };
 
 const dragStart = (e) => {
@@ -323,7 +367,6 @@ const dragStart = (e) => {
 };
 
 const dragEnd = () => {
-  console.log(999, "dragEnd");
   store.setComInOperation(null);
 };
 
@@ -332,25 +375,16 @@ const dragOver = (e) => {
   return true;
 };
 const dragEnter = () => {
-  console.log(999, "dragEnter1", store.compInOperation);
-
   if (!store.compInOperation) return;
-  console.log(
-    999,
-    "dragEnter2",
-    store.compInOperation.model.id === props.model.id,
-    !store.compInOperation,
-    props.model.isLeaf
-  );
+
   if (store.compInOperation.model.id === props.model.id) return;
   isDragEnterNode.value = true;
-
-  console.log(999, "dragEnter3", isDragEnterNode.value);
 };
 
 const dragLeave = () => {
   isDragEnterNode.value = false;
 };
+
 const drop = () => {
   if (!store.compInOperation) return;
   const oldParent = store.compInOperation.model.parent;
@@ -414,7 +448,8 @@ const dropAfter = () => {
 };
 
 const showMenu = () => {
-  store.setActivatedKey(key.value);
+  showMenuCard.value = true;
+  store.setShowMenuCardId(model.id);
 };
 
 onBeforeUnmount(() => {
@@ -458,15 +493,18 @@ const registerEventBusListeners = () => {
 const registerDomListeners = () => {
   document.addEventListener("click", function (event) {
     // 判断点击的是否是protectedElement本身，或者是它的子元素
-    const isClickInside = menuCard.value.contains(event.target);
-
+    const isClickInside =
+      menuCard.value && menuCard.value.contains(event.target);
+    console.log("vtl-selected2", model.id, store.activatedKey);
     // 如果点击发生在protectedElement之外
     if (!isClickInside) {
+      showMenuCard.value = false;
       // 在这里执行你的逻辑
-      store.setActivatedKey(null);
-
+      store.setShowMenuCardId(null);
+      //   !(model.disabled || model.dragDisabled) &&
+      //   model.id === store.activatedKey;
       // 如果需要的话，还可以阻止事件冒泡等进一步处理
-      // event.stopPropagation();
+      event.stopPropagation();
     }
   });
 };
@@ -488,6 +526,8 @@ onMounted(() => {
 @dark-click-color: #23d1bf;
 @disable-color: rgba(0, 0, 0, 0.25);
 @dark-disable-color: rgba(255, 255, 255, 0.25);
+@border-color: rgba(217, 217, 217, 1);
+@dark-border-color: rgba(66, 66, 66, 1);
 
 @font-face {
   font-family: "icomoon";
@@ -592,6 +632,7 @@ onMounted(() => {
     align-items: center;
     padding: 5px 0 5px 1rem;
     .vtl-node-content {
+      flex: 1 auto;
       & {
         cursor: pointer;
       }
@@ -615,6 +656,9 @@ onMounted(() => {
 
     &.vtl-active {
       outline: 2px dashed @selected-background-color;
+    }
+    &.vtl-selected {
+      background-color: @selected-background-color;
     }
 
     &.vtl-active-darkmode {
@@ -651,6 +695,13 @@ onMounted(() => {
   }
   .vtl-actived-menu {
     position: absolute;
+    right: 0;
+    background-color: white;
+    z-index: 1000;
+    border: 1px solid @border-color;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 10px;
   }
 }
 </style>
