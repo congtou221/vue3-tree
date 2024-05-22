@@ -147,7 +147,7 @@ const getNewTree = () => {
       }
     }
 
-    if (oldNode.children && oldNode.children.length > 0) {
+    if (oldNode && oldNode.children && oldNode.children.length > 0) {
       newNode.children = [];
       for (const child of oldNode.children) {
         newNode.children.push(_dfs(child));
@@ -156,24 +156,9 @@ const getNewTree = () => {
     return newNode;
   }
 
-  newTree.value = formatJson(_dfs(data.value));
+  newTree.value = formatJson(_dfs(data));
 };
 </script>
-<style lang="less" rel="stylesheet/less">
-// .vtl {
-//   .vtl-drag-disabled {
-//     background-color: #d0cfcf;
-
-//     &:hover {
-//       background-color: #d0cfcf;
-//     }
-//   }
-
-//   .vtl-disabled {
-//     background-color: #d0cfcf;
-//   }
-// }
-</style>
 
 <style lang="less" rel="stylesheet/less" scoped>
 .icon {
