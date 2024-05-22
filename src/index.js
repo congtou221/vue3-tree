@@ -1,3 +1,4 @@
-import Vue3Tree from "./components/Vue3TreeComponent.vue";
+import Vue3Tree from "./TreeComponent.vue";
+import { getTreeData, TreeNode } from "./treeModel.ts";
 
-export { Vue3Tree };
+export { Vue3Tree, getTreeData, TreeNode };
