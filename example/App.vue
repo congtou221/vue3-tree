@@ -1,7 +1,8 @@
 <template>
   <div>
     <button @click="addNode">Add Node</button>
-    <vue3-tree
+    <vue3-tree :model="data">
+      <!-- <vue3-tree
       @click="onClick"
       @change-name="onChangeName"
       @end-edit="onEndEdit"
@@ -14,7 +15,7 @@
       default-tree-node-name="new node"
       default-leaf-node-name="new leaf"
       v-bind:default-expanded="true"
-    >
+    > -->
       <!-- <template v-slot:leafNameDisplay="slotProps">
         <span>
           {{ slotProps.model.name }}
@@ -57,41 +58,41 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { Vue3Tree, getTreeData, TreeNode } from "../src";
+import tree from "./tree.json";
+const mockTree = [
+  {
+    name: "Node 1",
+    id: 1,
+    pid: 0,
+    dragDisabled: true,
+    addTreeNodeDisabled: true,
+    addLeafNodeDisabled: true,
+    editNodeDisabled: true,
+    delNodeDisabled: true,
+    children: [
+      {
+        name: "Node 1-2",
+        id: 2,
+        isLeaf: true,
+        pid: 1,
+      },
+    ],
+  },
+  {
+    name: "Node 2",
+    id: 3,
+    pid: 0,
+    disabled: true,
+  },
+  {
+    name: "Node 3",
+    id: 4,
+    pid: 0,
+  },
+];
 
 const newTree = ref({});
-const data = reactive(
-  getTreeData([
-    {
-      name: "Node 1",
-      id: 1,
-      pid: 0,
-      dragDisabled: true,
-      addTreeNodeDisabled: true,
-      addLeafNodeDisabled: true,
-      editNodeDisabled: true,
-      delNodeDisabled: true,
-      children: [
-        {
-          name: "Node 1-2",
-          id: 2,
-          isLeaf: true,
-          pid: 1,
-        },
-      ],
-    },
-    {
-      name: "Node 2",
-      id: 3,
-      pid: 0,
-      disabled: true,
-    },
-    {
-      name: "Node 3",
-      id: 4,
-      pid: 0,
-    },
-  ])
-);
+const data = reactive(getTreeData(tree));
 
 const onDel = (node) => {
   console.log("onDel", node);
@@ -111,7 +112,6 @@ const onAddNode = (params) => {
 };
 
 const onClick = (params) => {
-  console.log(999000, "onClick", params);
   console.log("onClick", params);
 };
 
@@ -129,8 +129,7 @@ const dropAfter = ({ node, src, target }) => {
 
 const addNode = () => {
   const node = new TreeNode({ name: "new node", isLeaf: false });
-  if (!data.children) data.children = [];
-  data.children.push(node);
+  data.addChildren(node);
 };
 
 const formatJson = (jsonObj) => {

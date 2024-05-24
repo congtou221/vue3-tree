@@ -125,7 +125,7 @@ export class TreeNode {
   // remove child
   _removeChild(child: TreeNode) {
     for (let i = 0, len = this.children?.length || 0; i < len; i++) {
-      if (this.children![i] === child) {
+      if (this.children![i].id === child.id) {
         (this.children || []).splice(i, 1);
         break;
       }
@@ -159,6 +159,7 @@ export class TreeNode {
     }
 
     this.parent?._removeChild(this);
+    console.log(111, this.parent);
     this.parent = target;
     this.pid = target.id;
     if (!target.children) {
