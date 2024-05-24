@@ -1,19 +1,19 @@
 {
-  "name": "vue3-tree",
-  "version": "0.1.0",
+  "name": "sailing-vue-tree",
+  "version": "0.1.1",
   "private": false,
   "author": "sixiaohui",
   "scripts": {
     "serve": "vue-cli-service serve ./example/main.js --open",
-    "build": "vue-cli-service build --name vue3-tree --entry ./src/index.js --target lib",
+    "build": "vue-cli-service build --name vue-tree --entry ./src/index.js --target lib",
     "lint": "vue-cli-service lint",
-    "doc:build": "npx vuedoc.md --section API --output ./README.md ./src/components/Vue3Tree.vue",
-    "prepublishOnly": "npm run lint && npm run build && npm run styleguide:build && npm run doc:build",
-    "styleguide": "vue-styleguidist server",
-    "styleguide:build": "vue-styleguidist build"
+    "doc:build": "npx vuedoc.md --section API --output ./README.md ./src/TreeComponent.vue",
+    "prepublishOnly": "npm run lint && npm run build  && npm run doc:build",
+    "styleguide": "vue-cli-service styleguidist",
+    "styleguide:build": "vue-cli-service styleguidist:build"
   },
-  "main": "dist/vue3-tree.umd.js",
-  "module": "dist/vue3-tree.common.min.js",
+  "main": "dist/vue-tree.umd.js",
+  "module": "dist/vue-tree.common.min.js",
   "files": [
     "dist/*.css",
     "dist/*.map",
@@ -46,6 +46,7 @@
     "ts-loader": "^9.5.1",
     "typescript": "3.9.4",
     "vue-cli-plugin-component": "^1.12.2",
+    "vue-cli-plugin-styleguidist": "~4.72.4",
     "vue-styleguidist": "^1.7.13",
     "vue-template-compiler": "^2.7.16"
   },

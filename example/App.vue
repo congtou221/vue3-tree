@@ -1,8 +1,8 @@
 <template>
   <div>
     <button @click="addNode">Add Node</button>
-    <vue3-tree :model="data">
-      <!-- <vue3-tree
+    <vue-tree :model="data">
+      <!-- <vue-tree
       @click="onClick"
       @change-name="onChangeName"
       @end-edit="onEndEdit"
@@ -50,14 +50,14 @@
           }}</span
         >
       </template> -->
-    </vue3-tree>
+    </vue-tree>
     <button @click="getNewTree">Get new tree</button>
     <pre>{{ newTree }}</pre>
   </div>
 </template>
 <script setup>
 import { reactive, ref } from "vue";
-import { Vue3Tree, getTreeData, TreeNode } from "../src";
+import { VueTree, getTreeData, TreeNode } from "../src";
 import tree from "./tree.json";
 const mockTree = [
   {

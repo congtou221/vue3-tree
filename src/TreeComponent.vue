@@ -40,17 +40,32 @@
           />
         </span>
         <span v-if="model.isLeaf">
-          <slot name="leafNodeIcon" :expanded="expanded" :model="model">
+          <slot
+            name="leafNodeIcon"
+            :expanded="expanded"
+            :model="model"
+          >
             <i class="vtl-icon vtl-menu-icon vtl-icon-file" />
           </slot>
         </span>
         <span v-else>
-          <slot name="treeNodeIcon" :expanded="expanded" :model="model">
+          <slot
+            name="treeNodeIcon"
+            :expanded="expanded"
+            :model="model"
+          >
             <i class="vtl-icon vtl-menu-icon vtl-icon-folder" />
           </slot>
         </span>
-        <div v-if="!editable" class="vtl-node-content">
-          <slot name="leafNameDisplay" :expanded="expanded" :model="model">
+        <div
+          v-if="!editable"
+          class="vtl-node-content"
+        >
+          <slot
+            name="leafNameDisplay"
+            :expanded="expanded"
+            :model="model"
+          >
             {{ model.name }}
           </slot>
         </div>
@@ -63,15 +78,15 @@
           @input="updateName"
           @blur="setUnEditable"
           @keyup.enter="setUnEditable"
-        />
+        >
         <div
-          class="vtl-operation"
           v-show="
             isHover ||
-            model.id === store.activatedKey ||
-            showMenuCard ||
-            showAddCard
+              model.id === store.activatedKey ||
+              showMenuCard ||
+              showAddCard
           "
+          class="vtl-operation"
         >
           <!-- <span
             v-if="!model.addTreeNodeDisabled"
@@ -87,7 +102,11 @@
             :title="defaultAddLeafNodeTitle"
             @click.stop.prevent="showAdd()"
           >
-            <slot name="addLeafNodeIcon" :expanded="expanded" :model="model">
+            <slot
+              name="addLeafNodeIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-plus" />
             </slot>
           </span>
@@ -96,21 +115,33 @@
             :title="defaultAddTreeNodeTitle"
             @click.stop.prevent="showMenu()"
           >
-            <slot name="menuIcon" :expanded="expanded" :model="model">
+            <slot
+              name="menuIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-flicker" />
             </slot>
           </span>
         </div>
       </div>
-      <div v-if="showAddCard" ref="addCard" class="vtl-actived-menu">
+      <div
+        v-if="showAddCard"
+        ref="addCard"
+        class="vtl-actived-menu"
+      >
         <ul class="vtl-menu-list">
           <li
             v-if="!model.editNodeDisabled"
             :title="defaultAddLeafNodeTitle"
-            @click.stop.prevent="addChild(true)"
             class="vtl-menu-item"
+            @click.stop.prevent="addChild(true)"
           >
-            <slot name="editNodeIcon" :expanded="expanded" :model="model">
+            <slot
+              name="editNodeIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-plus" />
               <span class="vtl-menu-item-title">文档</span>
             </slot>
@@ -119,25 +150,37 @@
           <li
             v-if="!model.editNodeDisabled"
             :title="defaultAddTreeNodeTitle"
-            @click.stop.prevent="addChild(false)"
             class="vtl-menu-item"
+            @click.stop.prevent="addChild(false)"
           >
-            <slot name="editNodeIcon" :expanded="expanded" :model="model">
+            <slot
+              name="editNodeIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-folder-plus-e" />
               <span class="vtl-menu-item-title">文件夹</span>
             </slot>
           </li>
         </ul>
       </div>
-      <div v-if="showMenuCard" ref="menuCard" class="vtl-actived-menu">
+      <div
+        v-if="showMenuCard"
+        ref="menuCard"
+        class="vtl-actived-menu"
+      >
         <ul class="vtl-menu-list">
           <li
             v-if="!model.editNodeDisabled"
             title="edit"
-            @click.stop.prevent="setEditable"
             class="vtl-menu-item"
+            @click.stop.prevent="setEditable"
           >
-            <slot name="editNodeIcon" :expanded="expanded" :model="model">
+            <slot
+              name="editNodeIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-edit" />
               <span class="vtl-menu-item-title">重命名</span>
             </slot>
@@ -146,10 +189,14 @@
           <li
             v-if="!model.delNodeDisabled"
             title="delete"
-            @click.stop.prevent="delNode"
             class="vtl-menu-item"
+            @click.stop.prevent="delNode"
           >
-            <slot name="delNodeIcon" :expanded="expanded" :model="model">
+            <slot
+              name="delNodeIcon"
+              :expanded="expanded"
+              :model="model"
+            >
               <i class="vtl-icon vtl-icon-trash" />
               <span class="vtl-menu-item-title">删除</span>
             </slot>
@@ -182,25 +229,46 @@
         :model="model"
       >
         <template #leafNameDisplay="slotProps">
-          <slot name="leafNameDisplay" v-bind="slotProps" />
+          <slot
+            name="leafNameDisplay"
+            v-bind="slotProps"
+          />
         </template>
         <template #addTreeNodeIcon="slotProps">
-          <slot name="addTreeNodeIcon" v-bind="slotProps" />
+          <slot
+            name="addTreeNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
         <template #addLeafNodeIcon="slotProps">
-          <slot name="addLeafNodeIcon" v-bind="slotProps" />
+          <slot
+            name="addLeafNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
         <template #editNodeIcon="slotProps">
-          <slot name="editNodeIcon" v-bind="slotProps" />
+          <slot
+            name="editNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
         <template #delNodeIcon="slotProps">
-          <slot name="delNodeIcon" v-bind="slotProps" />
+          <slot
+            name="delNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
         <template #leafNodeIcon="slotProps">
-          <slot name="leafNodeIcon" v-bind="slotProps" />
+          <slot
+            name="leafNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
         <template #treeNodeIcon="slotProps">
-          <slot name="treeNodeIcon" v-bind="slotProps" />
+          <slot
+            name="treeNodeIcon"
+            v-bind="slotProps"
+          />
         </template>
       </component>
     </div>
