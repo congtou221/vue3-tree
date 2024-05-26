@@ -1,5 +1,5 @@
 {
-  "name": "sailing-vue-tree",
+  "name": "sailing-vuetree",
   "version": "0.1.1",
   "private": false,
   "author": "sixiaohui",
@@ -8,16 +8,17 @@
     "build": "vue-cli-service build --name vue-tree --entry ./src/index.js --target lib",
     "lint": "vue-cli-service lint",
     "doc:build": "npx vuedoc.md --section API --output ./README.md ./src/TreeComponent.vue",
-    "prepublishOnly": "npm run lint && npm run build  && npm run doc:build",
+    "prepublishOnly": "npm run lint && npm run build && npm run styleguide:build && npm run doc:build",
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build"
   },
   "main": "dist/vue-tree.umd.js",
-  "module": "dist/vue-tree.common.min.js",
+  "module": "dist/vue-tree.common.js",
   "files": [
     "dist/*.css",
     "dist/*.map",
     "dist/*.js",
+    "dist/**/*.*",
     "src/*"
   ],
   "dependencies": {

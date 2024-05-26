@@ -11,11 +11,11 @@
 ```
 
 ```javascript
-import { VueTree } from "vue-tree";
+import { VueTree, getTreeData } from "sailing-vuetree";
 
 export default {
   data: {
-    mockData: [
+    mockData: getTreeData([
       {
         name: "Node 1",
         id: 1,
@@ -41,7 +41,7 @@ export default {
         id: 4,
         pid: 0,
       },
-    ],
+    ]),
   },
   components: {
     VueTree,

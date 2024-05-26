@@ -1,5 +1,8 @@
 const path = require("path");
 module.exports = {
+  css: {
+    extract: false,
+  },
   chainWebpack: (config) => {
     config.module
       .rule("ts")
