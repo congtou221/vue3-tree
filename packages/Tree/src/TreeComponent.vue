@@ -2,7 +2,7 @@
   <div class="vtl">
     <div
       v-if="model.name !== 'root'"
-      :id="model.id"
+      :id="`${model.id}`"
       class="vtl-node"
       :class="{ 'vtl-leaf-node': model.isLeaf, 'vtl-tree-node': !model.isLeaf }"
       @click="click"
@@ -40,32 +40,17 @@
           />
         </span>
         <span v-if="model.isLeaf">
-          <slot
-            name="leafNodeIcon"
-            :expanded="expanded"
-            :model="model"
-          >
+          <slot name="leafNodeIcon" :expanded="expanded" :model="model">
             <i class="vtl-icon vtl-menu-icon vtl-icon-file" />
           </slot>
         </span>
         <span v-else>
-          <slot
-            name="treeNodeIcon"
-            :expanded="expanded"
-            :model="model"
-          >
+          <slot name="treeNodeIcon" :expanded="expanded" :model="model">
             <i class="vtl-icon vtl-menu-icon vtl-icon-folder" />
           </slot>
         </span>
-        <div
-          v-if="!editable"
-          class="vtl-node-content"
-        >
-          <slot
-            name="leafNameDisplay"
-            :expanded="expanded"
-            :model="model"
-          >
+        <div v-if="!editable" class="vtl-node-content">
+          <slot name="leafNameDisplay" :expanded="expanded" :model="model">
             {{ model.name }}
           </slot>
         </div>
@@ -78,13 +63,13 @@
           @input="updateName"
           @blur="setUnEditable"
           @keyup.enter="setUnEditable"
-        >
+        />
         <div
           v-show="
             isHover ||
-              model.id === store.activatedKey ||
-              showMenuCard ||
-              showAddCard
+            model.id === store.activatedKey ||
+            showMenuCard ||
+            showAddCard
           "
           class="vtl-operation"
         >
@@ -98,15 +83,11 @@
             </slot>
           </span> -->
           <span
-            v-if="!model.addLeafNodeDisabled"
+            v-if="!model.addLeafNodeDisabled && !model.isLeaf"
             :title="defaultAddLeafNodeTitle"
             @click.stop.prevent="showAdd()"
           >
-            <slot
-              name="addLeafNodeIcon"
-              :expanded="expanded"
-              :model="model"
-            >
+            <slot name="addLeafNodeIcon" :expanded="expanded" :model="model">
               <i class="vtl-icon vtl-icon-plus" />
             </slot>
           </span>
@@ -115,93 +96,71 @@
             :title="defaultAddTreeNodeTitle"
             @click.stop.prevent="showMenu()"
           >
-            <slot
-              name="menuIcon"
-              :expanded="expanded"
-              :model="model"
-            >
+            <slot name="menuIcon" :expanded="expanded" :model="model">
               <i class="vtl-icon vtl-icon-flicker" />
             </slot>
           </span>
         </div>
       </div>
-      <div
-        v-if="showAddCard"
-        ref="addCard"
-        class="vtl-actived-menu"
-      >
-        <ul class="vtl-menu-list">
-          <li
-            v-if="!model.editNodeDisabled"
-            :title="defaultAddLeafNodeTitle"
-            class="vtl-menu-item"
-            @click.stop.prevent="addChild(true)"
-          >
-            <slot
-              name="editNodeIcon"
-              :expanded="expanded"
-              :model="model"
+      <div v-if="showAddCard" class="vtl-actived-menu-wrapper">
+        <div class="vtl-actived-menu" ref="addCard">
+          <ul class="vtl-menu-list">
+            <li
+              v-if="!model.editNodeDisabled"
+              :title="defaultAddLeafNodeTitle"
+              class="vtl-menu-item"
+              @click.stop.prevent="addChild(true)"
             >
-              <i class="vtl-icon vtl-icon-plus" />
-              <span class="vtl-menu-item-title">文档</span>
-            </slot>
-          </li>
+              <slot name="editNodeIcon" :expanded="expanded" :model="model">
+                <i class="vtl-icon vtl-icon-plus" />
+                <span class="vtl-menu-item-title">文档</span>
+              </slot>
+            </li>
 
-          <li
-            v-if="!model.editNodeDisabled"
-            :title="defaultAddTreeNodeTitle"
-            class="vtl-menu-item"
-            @click.stop.prevent="addChild(false)"
-          >
-            <slot
-              name="editNodeIcon"
-              :expanded="expanded"
-              :model="model"
+            <li
+              v-if="!model.editNodeDisabled"
+              :title="defaultAddTreeNodeTitle"
+              class="vtl-menu-item"
+              @click.stop.prevent="addChild(false)"
             >
-              <i class="vtl-icon vtl-icon-folder-plus-e" />
-              <span class="vtl-menu-item-title">文件夹</span>
-            </slot>
-          </li>
-        </ul>
+              <slot name="editNodeIcon" :expanded="expanded" :model="model">
+                <i class="vtl-icon vtl-icon-folder-plus-e" />
+                <span class="vtl-menu-item-title">文件夹</span>
+              </slot>
+            </li>
+          </ul>
+        </div>
+        <div class="vtl-actived-menu-bg" @click="clickHandler"></div>
       </div>
-      <div
-        v-if="showMenuCard"
-        ref="menuCard"
-        class="vtl-actived-menu"
-      >
-        <ul class="vtl-menu-list">
-          <li
-            v-if="!model.editNodeDisabled"
-            title="edit"
-            class="vtl-menu-item"
-            @click.stop.prevent="setEditable"
-          >
-            <slot
-              name="editNodeIcon"
-              :expanded="expanded"
-              :model="model"
+      <div v-if="showMenuCard" class="vtl-actived-menu-wrapper">
+        <div class="vtl-actived-menu" ref="menuCard">
+          <ul class="vtl-menu-list">
+            <li
+              v-if="!model.editNodeDisabled"
+              title="edit"
+              class="vtl-menu-item"
+              @click.stop.prevent="setEditable"
             >
-              <i class="vtl-icon vtl-icon-edit" />
-              <span class="vtl-menu-item-title">重命名</span>
-            </slot>
-          </li>
+              <slot name="editNodeIcon" :expanded="expanded" :model="model">
+                <i class="vtl-icon vtl-icon-edit" />
+                <span class="vtl-menu-item-title">重命名</span>
+              </slot>
+            </li>
 
-          <li
-            v-if="!model.delNodeDisabled"
-            title="delete"
-            class="vtl-menu-item"
-            @click.stop.prevent="delNode"
-          >
-            <slot
-              name="delNodeIcon"
-              :expanded="expanded"
-              :model="model"
+            <li
+              v-if="!model.delNodeDisabled"
+              title="delete"
+              class="vtl-menu-item"
+              @click.stop.prevent="delNode"
             >
-              <i class="vtl-icon vtl-icon-trash" />
-              <span class="vtl-menu-item-title">删除</span>
-            </slot>
-          </li>
-        </ul>
+              <slot name="delNodeIcon" :expanded="expanded" :model="model">
+                <i class="vtl-icon vtl-icon-trash" />
+                <span class="vtl-menu-item-title">删除</span>
+              </slot>
+            </li>
+          </ul>
+        </div>
+        <div class="vtl-actived-menu-bg" @click="clickHandler"></div>
       </div>
       <div
         v-if="model.children && model.children.length > 0 && expanded"
@@ -228,91 +187,56 @@
         :default-expanded="defaultExpanded"
         :model="model"
       >
-        <template #leafNameDisplay="slotProps">
-          <slot
-            name="leafNameDisplay"
-            v-bind="slotProps"
-          />
+        <template v-slot:leafNameDisplay="slotProps">
+          <slot name="leafNameDisplay" v-bind="slotProps" />
         </template>
-        <template #addTreeNodeIcon="slotProps">
-          <slot
-            name="addTreeNodeIcon"
-            v-bind="slotProps"
-          />
+        <!-- <template #addTreeNodeIcon="slotProps">
+          <slot name="addTreeNodeIcon" v-bind="slotProps" />
         </template>
         <template #addLeafNodeIcon="slotProps">
-          <slot
-            name="addLeafNodeIcon"
-            v-bind="slotProps"
-          />
+          <slot name="addLeafNodeIcon" v-bind="slotProps" />
         </template>
         <template #editNodeIcon="slotProps">
-          <slot
-            name="editNodeIcon"
-            v-bind="slotProps"
-          />
+          <slot name="editNodeIcon" v-bind="slotProps" />
         </template>
         <template #delNodeIcon="slotProps">
-          <slot
-            name="delNodeIcon"
-            v-bind="slotProps"
-          />
+          <slot name="delNodeIcon" v-bind="slotProps" />
+        </template> -->
+        <template v-slot:leafNodeIcon="slotProps">
+          <slot name="leafNodeIcon" v-bind="slotProps" />
         </template>
-        <template #leafNodeIcon="slotProps">
-          <slot
-            name="leafNodeIcon"
-            v-bind="slotProps"
-          />
-        </template>
-        <template #treeNodeIcon="slotProps">
-          <slot
-            name="treeNodeIcon"
-            v-bind="slotProps"
-          />
+        <template v-slot:treeNodeIcon="slotProps">
+          <slot name="treeNodeIcon" v-bind="slotProps" />
         </template>
       </component>
     </div>
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {
   onMounted,
   onBeforeUnmount,
   defineAsyncComponent,
   watchEffect,
+  computed,
+  ref,
+  reactive,
 } from "vue";
-import { computed, ref, reactive } from "@vue/reactivity";
-import { TreeNode, removeHandler } from "./treeModel.ts";
-import eventBus from "./eventBus.ts";
-import store from "./store.ts";
+import { TreeNode, removeHandler } from "./treeModel";
+import eventBus from "~/eventBus";
+import store, { CompInOperationType } from "~/store";
+import { ITreeNodeInstance } from "typings/treeComponent";
 
-const props = defineProps({
-  model: {
-    type: Object,
-    default: () => ({}),
-  },
-  defaultLeafNodeName: {
-    type: String,
-    default: () => "Leaf Node",
-  },
-  defaultTreeNodeName: {
-    type: String,
-    default: () => "Tree Node",
-  },
-  defaultAddTreeNodeTitle: {
-    type: String,
-    default: () => "Add Tree Node",
-  },
-  defaultAddLeafNodeTitle: {
-    type: String,
-    default: () => "Add Leaf Node",
-  },
-  defaultExpanded: {
-    type: Boolean,
-    default: () => true,
-  },
-});
+const props = defineProps<{
+  model: ITreeNodeInstance;
+  defaultLeafNodeName?: string;
+  defaultTreeNodeName?: string;
+  defaultAddTreeNodeTitle?: string;
+  defaultAddLeafNodeTitle?: string;
+  defaultExpanded?: boolean;
+  editable?: boolean;
+}>();
 
 const emit = defineEmits([
   "change-name",
@@ -324,31 +248,47 @@ const emit = defineEmits([
   "drop-before",
   "drop-after",
 ]);
-
-const isHover = ref(false);
-const editable = ref(props.editable || false);
-const isDragEnterUp = ref(false);
-const isDragEnterBottom = ref(false);
-const isDragEnterNode = ref(false);
-const expanded = ref(props.defaultExpanded);
-const model = reactive(props.model);
+const DefaultTreedNode = new TreeNode({ name: "root", isLeaf: false, id: 0 });
+const isHover = ref<boolean>(false);
+const editable = ref<boolean>(props.editable || false);
+const isDragEnterUp = ref<boolean>(false);
+const isDragEnterBottom = ref<boolean>(false);
+const isDragEnterNode = ref<boolean>(false);
+const expanded = ref<boolean>(props.defaultExpanded || true);
+const model = reactive<ITreeNodeInstance>(props?.model || DefaultTreedNode);
 // 定义一个ref来引用DOM元素
-const menuCard = ref(null);
-const addCard = ref(null);
-const showActiveStyle = ref(false);
-const showMenuCard = ref(false);
-const showAddCard = ref(false);
+const menuCard = ref<HTMLDivElement | null>(null);
+const addCard = ref<HTMLDivElement | null>(null);
+const showActiveStyle = ref<boolean>(false);
+const showMenuCard = ref<boolean>(false);
+const showAddCard = ref<boolean>(false);
 
-const fakeDragNode = ref(null);
+const fakeDragNode = ref<HTMLDivElement | null>(null);
+
+const asyncComponentReady = ref(false);
+const nodeInput = ref<HTMLInputElement | null>(null);
+
+// 在你的组件的TS部分定义slotProps的类型
+interface SlotProps {
+  model: ITreeNodeInstance;
+  expanded: boolean;
+  // 添加其他属性，如果有的话
+}
+
+const slotProps: SlotProps = {
+  model: props.model || DefaultTreedNode,
+  expanded: props.defaultExpanded,
+  // 其他属性...
+};
 
 // 将一些操作封装成计算属性以提高代码复用性和可读性
-const rootNode = computed(() => {
-  let node = props.$parent;
-  while (node?._props.model.name !== "root") {
-    node = node.$parent;
-  }
-  return node;
-});
+// const rootNode = computed(() => {
+//   let node = props.$parent;
+//   while (node?._props.model.name !== "root") {
+//     node = node.$parent;
+//   }
+//   return node;
+// });
 
 const caretClass = computed(() =>
   expanded.value ? "vtl-icon-caret-down" : "vtl-icon-caret-right"
@@ -367,27 +307,35 @@ const treeNodeClass = computed(() => ({
 }));
 
 // 在数据操作函数中加入异常处理逻辑
-const updateName = (e) => {
+const updateName = (e: Event) => {
   try {
-    const oldName = props.model.name;
-    props.model.changeName(e.target.value);
-    console.log("update Name");
-    eventBus.emit("change-name", {
-      id: props.model.id,
-      oldName: oldName,
-      newName: e.target.value,
-      node: props.model,
-    });
+    const target = e.target as HTMLInputElement;
+    const model = props.model || DefaultTreedNode;
+    const oldName = model.name;
+    if (target && target.type === "text") {
+      model.changeName(target.value);
+      console.log("update Name");
+      eventBus.emit("change-name", {
+        id: model.id,
+        oldName: oldName,
+        newName: target.value,
+        node: model,
+      });
+    }
   } catch (error) {
     console.error("Error updating name:", error);
   }
 };
 
-const delNode = () => eventBus.emit("delete-node", props.model);
-const nodeInput = ref(null);
+const delNode = () => {
+  store.setShowMenuCardId(null);
+  eventBus.emit("delete-node", props.model || DefaultTreedNode);
+  props.model.remove();
+};
 
 const setEditable = () => {
   editable.value = true;
+  store.setShowMenuCardId(null);
   watchEffect(() => {
     // 确保在 DOM 更新后聚焦并设置光标位置
     if (nodeInput.value) {
@@ -396,25 +344,29 @@ const setEditable = () => {
     }
   });
 };
-const setUnEditable = (e) => {
+const setUnEditable = (e: KeyboardEvent | FocusEvent) => {
   if (editable.value === false) return;
   editable.value = false;
-  const oldName = props.model.name;
-  props.model.changeName(e.target.value);
-  eventBus.emit("change-name", {
-    id: props.model.id,
-    oldName: oldName,
-    newName: e.target.value,
-    eventType: "blur",
-  });
-  eventBus.emit("end-edit", {
-    id: props.model.id,
-    oldName: oldName,
-    newName: e.target.value,
-  });
+  const target = e.target as HTMLInputElement;
+  const model = props.model || DefaultTreedNode;
+  const oldName = model.name;
+  if (target && target.type === "text") {
+    model.changeName(target.value);
+    eventBus.emit("change-name", {
+      id: model.id,
+      oldName: oldName,
+      newName: target.value,
+      eventType: "blur",
+    });
+    eventBus.emit("end-edit", {
+      id: model.id,
+      oldName: oldName,
+      newName: target.value,
+    });
+  }
 };
 
-const toggle = () => {
+const toggle = async () => {
   if (isFolder) {
     expanded.value = !expanded.value;
   }
@@ -429,68 +381,67 @@ const mouseOut = () => {
 
 const click = () => {
   eventBus.emit("click", {
-    toggle: props.toggle,
+    toggle: toggle,
     ...props.model,
   });
   store.setActivatedKey(model.id);
   console.log("vtl-selected1", model.id, store.activatedKey);
 };
 
-watchEffect(() => {
-  showActiveStyle.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.activatedKey;
-  showMenuCard.value =
-    !(model.disabled || model.dragDisabled) &&
-    model.id === store.showMenuCardId;
-  showAddCard.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.showAddCardId;
-});
-
-const addChild = (isLeaf) => {
-  const name = isLeaf ? props.defaultLeafNodeName : props.defaultTreeNodeName;
+const addChild = (isLeaf: boolean) => {
+  const name = isLeaf
+    ? props.defaultLeafNodeName || "Leaf Node"
+    : props.defaultTreeNodeName || "Tree Node";
   expanded.value = true;
   var node = new TreeNode({ name, isLeaf });
-  props.model.addChildren(node, true);
+  (props.model || DefaultTreedNode).addChildren(node);
   eventBus.emit("add-node", node);
 };
 
-const dragStart = (e) => {
-  if (!(props.model.dragDisabled || props.model.disabled)) {
-    store.setComInOperation(props);
+const dragStart = (e: DragEvent) => {
+  if (
+    !(
+      (props.model || DefaultTreedNode).dragDisabled ||
+      (props.model || DefaultTreedNode).disabled
+    )
+  ) {
+    store.setComInOperation(props as unknown as CompInOperationType);
     store.setDragging(model.id);
+
+    initFakeDragNode();
+    dragWithCustomImage(e);
     // for firefox
+    if (!e.dataTransfer) return;
     e.dataTransfer.setData("data", "data");
     e.dataTransfer.effectAllowed = "move";
-    initFakeDragNode();
-
-    dragWithCustomImage(e);
     return true;
   }
   return false;
 };
 
-function dragWithCustomImage(event) {
+function dragWithCustomImage(event: DragEvent) {
   if (!fakeDragNode.value) return;
-  fakeDragNode.value.innerHTML = model.name;
+  fakeDragNode.value.innerHTML = model.name || "";
   var dt = event.dataTransfer;
+  if (!dt) return;
   dt.setData("text/plain", "Data to Drag");
   dt.setDragImage(fakeDragNode.value, 0, 0);
 }
 
 const dragEnd = () => {
   store.setComInOperation(null);
-  store.setDragging(null);
   removeFakeDragNode();
 };
 
-const dragOver = (e) => {
+const dragOver = (e: DragEvent) => {
   e.preventDefault();
   return true;
 };
 const dragEnter = () => {
   if (!store.compInOperation) return;
 
-  if (store.compInOperation.model.id === props.model.id) return;
+  if (store.compInOperation?.model.id === (props.model || DefaultTreedNode).id)
+    return;
   isDragEnterNode.value = true;
 };
 
@@ -501,10 +452,11 @@ const dragLeave = () => {
 const drop = () => {
   if (!store.compInOperation) return;
   const oldParent = store.compInOperation.model.parent;
-  store.compInOperation.model.moveInto(props.model);
+  const model = props.model || DefaultTreedNode;
+  store.compInOperation.model.moveInto(model);
   isDragEnterNode.value = false;
   eventBus.emit("drop", {
-    target: props.model,
+    target: model,
     node: store.compInOperation.model,
     src: oldParent,
   });
@@ -517,7 +469,7 @@ const dragEnterUp = () => {
 
   console.log("dragEnterUp", store.compInOperation, isDragEnterUp);
 };
-const dragOverUp = (e) => {
+const dragOverUp = (e: DragEvent) => {
   e.preventDefault();
   return true;
 };
@@ -528,10 +480,11 @@ const dragLeaveUp = () => {
 const dropBefore = () => {
   if (!store.compInOperation) return;
   const oldParent = store.compInOperation.model.parent;
-  store.compInOperation.model.insertBefore(props.model);
+  const model = props.model || DefaultTreedNode;
+  store.compInOperation.model.insertBefore(model);
   isDragEnterUp.value = false;
   eventBus.emit("drop-before", {
-    target: props.model,
+    target: model,
     node: store.compInOperation.model,
     src: oldParent,
   });
@@ -541,7 +494,7 @@ const dragEnterBottom = () => {
   if (!store.compInOperation) return;
   isDragEnterBottom.value = true;
 };
-const dragOverBottom = (e) => {
+const dragOverBottom = (e: DragEvent) => {
   e.preventDefault();
   return true;
 };
@@ -551,33 +504,65 @@ const dragLeaveBottom = () => {
 };
 const dropAfter = () => {
   if (!store.compInOperation) return;
-  const oldParent = store.compInOperation.model.parent;
-  store.compInOperation.model.insertAfter(props.model);
+  const oldParent = store.compInOperation.model?.parent;
+  const model = props.model || DefaultTreedNode;
+  store.compInOperation.model?.insertAfter(model);
   isDragEnterBottom.value = false;
   eventBus.emit("drop-after", {
-    target: props.model,
+    target: model,
     node: store.compInOperation.model,
     src: oldParent,
   });
 };
 
 const showMenu = () => {
-  showMenuCard.value = true;
+  // store.setIsShowingCardType(CardType.Menu);
   store.setShowMenuCardId(model.id);
 };
 
 const showAdd = () => {
-  showAddCard.value = true;
   store.setShowAddCardId(model.id);
+  // store.setIsShowingCardType(CardType.Add);
 };
 
-const asyncComponentReady = ref(false);
-const AsyncDynamicComponent = defineAsyncComponent(() =>
-  import("./TreeComponent.vue").then((module) => module.default)
-);
-const loadAsyncComponent = async () => {
-  await AsyncDynamicComponent;
-  asyncComponentReady.value = true;
+const clickHandler = (event: MouseEvent) => {
+  const isMenuCard =
+    menuCard.value &&
+    event.target instanceof Node &&
+    menuCard.value.contains(event.target);
+
+  const isAddCard =
+    addCard.value &&
+    event.target instanceof Node &&
+    addCard.value.contains(event.target);
+
+  // 如果点击发生在protectedElement之外
+  if (!(isMenuCard || isAddCard)) {
+    store.setShowMenuCardId(null);
+    store.setShowAddCardId(null);
+    // store.setIsShowingCardType(null);
+    unregisterEventBusListeners();
+
+    // 如果需要的话，还可以阻止事件冒泡等进一步处理
+    event.stopPropagation();
+  }
+};
+
+const initFakeDragNode = () => {
+  const dragNode = document.createElement("div");
+  dragNode.className = "fake-drag-node";
+  dragNode.style.cssText =
+    "position: fixed;left: -100%;background: #f5f5f5;z-index: 9999;width: 300px;font: 14px;padding: 0 14px;border-radius: 2px;";
+  fakeDragNode.value = dragNode;
+
+  document.body.appendChild(dragNode);
+};
+
+const removeFakeDragNode = () => {
+  const dragNode = fakeDragNode.value;
+  if (dragNode && document.body.contains(dragNode)) {
+    document.body.removeChild(dragNode);
+  }
 };
 const registerEventBusListeners = () => {
   eventBus.on("click", (params) => {
@@ -617,58 +602,33 @@ const unregisterEventBusListeners = () => {
   eventBus.off("drop-after");
 };
 
-const clickHandler = (event) => {
-  const isClickInside =
-    (menuCard.value && menuCard.value.contains(event.target)) ||
-    (addCard.value && addCard.value.contains(event.target));
+const AsyncDynamicComponent = defineAsyncComponent(() =>
+  import("./TreeComponent.vue").then((module) => module.default)
+);
 
-  // 如果点击发生在protectedElement之外
-  if (!isClickInside) {
-    showMenuCard.value = false;
-    // 在这里执行你的逻辑
-    store.setShowMenuCardId(null);
-    store.setShowAddCardId(null);
-    //   !(model.disabled || model.dragDisabled) &&
-    //   model.id === store.activatedKey;
-    // 如果需要的话，还可以阻止事件冒泡等进一步处理
-    event.stopPropagation();
-  }
-};
-const registerDomListeners = () => {
-  document.addEventListener("click", clickHandler);
-};
-
-const unregisterDomListeners = () => {
-  document.removeEventListener("click", clickHandler);
-};
-
-const initFakeDragNode = () => {
-  const dragNode = document.createElement("div");
-  dragNode.className = "fake-drag-node";
-  dragNode.style.cssText =
-    "position: fixed;left: -100%;background: #f5f5f5;z-index: 9999;width: 300px;font: 14px;padding: 0 14px;border-radius: 2px;";
-  fakeDragNode.value = dragNode;
-
-  document.body.appendChild(dragNode);
-};
-
-const removeFakeDragNode = () => {
-  const dragNode = fakeDragNode.value;
-  if (dragNode && document.body.contains(dragNode)) {
-    document.body.removeChild(dragNode);
-  }
+const loadAsyncComponent = async () => {
+  await AsyncDynamicComponent;
+  asyncComponentReady.value = true;
 };
 
 onMounted(() => {
   loadAsyncComponent();
   registerEventBusListeners();
-  registerDomListeners();
 });
 
 onBeforeUnmount(() => {
   unregisterEventBusListeners();
-  unregisterDomListeners();
   removeHandler(window, "keyup");
+});
+
+watchEffect(() => {
+  showActiveStyle.value =
+    !(model.disabled || model.dragDisabled) && model.id === store.activatedKey;
+  showMenuCard.value =
+    !(model.disabled || model.dragDisabled) &&
+    model.id === store.showMenuCardId;
+  showAddCard.value =
+    !(model.disabled || model.dragDisabled) && model.id === store.showAddCardId;
 });
 </script>
 
@@ -702,12 +662,13 @@ onBeforeUnmount(() => {
 
 @font-face {
   font-family: "icomoon";
-  src: url("./assets/fonts/icomoon.eot?ui1hbx");
+  src: url("../../assets/fonts/icomoon.eot?ui1hbx");
   src:
-    url("./assets/fonts/icomoon.eot?ui1hbx#iefix") format("embedded-opentype"),
-    url("./assets/fonts/icomoon.ttf?ui1hbx") format("truetype"),
-    url("./assets/fonts/icomoon.woff?ui1hbx") format("woff"),
-    url("./assets/fonts/icomoon.svg?ui1hbx#icomoon") format("svg");
+    url("../../assets/fonts/icomoon.eot?ui1hbx#iefix")
+      format("embedded-opentype"),
+    url("../../assets/fonts/icomoon.ttf?ui1hbx") format("truetype"),
+    url("../../assets/fonts/icomoon.woff?ui1hbx") format("woff"),
+    url("../../assets/fonts/icomoon.svg?ui1hbx#icomoon") format("svg");
   font-weight: normal;
   font-style: normal;
 }
@@ -890,35 +851,46 @@ onBeforeUnmount(() => {
   .vtl-tree-margin {
     margin-left: 2em;
   }
-  .vtl-actived-menu {
-    position: absolute;
-    min-width: 144px;
-    right: 0;
-    background-color: white;
-    z-index: 1000;
-    border: 1px solid @border-color;
-    border-radius: 5px;
-    margin-right: 10px;
-    .vtl-menu-list {
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-      position: relative;
-      margin: 0;
-      padding: 2px 0px;
-      text-align: left;
-      list-style-type: none;
-      box-shadow: var(--shadow-s4-down);
-      border: 1px solid var(--line-border-card);
-      overflow-y: overlay;
-      .vtl-menu-item {
-        line-height: 22px;
-        margin: 1px 3px;
-        padding: 4px 8px;
-        border-radius: 4px;
-        &:hover {
-          background-color: @background-color;
-          cursor: pointer;
+
+  .vtl-actived-menu-wrapper {
+    .vtl-actived-menu-bg {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+    }
+
+    .vtl-actived-menu {
+      position: absolute;
+      min-width: 144px;
+      right: 0;
+      border: 1px solid @border-color;
+      border-radius: 5px;
+      z-index: 99999;
+      background-color: white;
+      .vtl-menu-list {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        position: relative;
+        margin: 0;
+        padding: 2px 0px;
+        text-align: left;
+        list-style-type: none;
+        box-shadow: var(--shadow-s4-down);
+        border: 1px solid var(--line-border-card);
+        overflow-y: overlay;
+        .vtl-menu-item {
+          line-height: 22px;
+          margin: 1px 3px;
+          padding: 4px 8px;
+          border-radius: 4px;
+          &:hover {
+            background-color: @background-color;
+            cursor: pointer;
+          }
         }
       }
     }

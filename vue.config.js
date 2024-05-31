@@ -1,13 +1,19 @@
 const path = require("path");
+const AutoImport = require("unplugin-auto-import/webpack").default;
 module.exports = {
   css: {
     extract: false,
+  },
+  configureWebpack: (config) => {
+    config.externals = {
+      vue: "vue",
+    };
   },
   chainWebpack: (config) => {
     config.module
       .rule("ts")
       .test(/\.ts$/)
-      .include.add(path.resolve(__dirname, "src"))
+      .include.add(path.resolve(__dirname, "packages"))
       .end()
       .use("ts-loader")
       .loader("ts-loader")
@@ -23,5 +29,9 @@ module.exports = {
       .test(/\.d\.tsx$/)
       .exclude.add(path.resolve(__dirname, "src"))
       .end();
+
+    config.resolve.extensions.add(".ts").add(".js").add(".vue").add(".json");
+
+    config.resolve.alias.set("~", path.resolve("packages"));
   },
 };

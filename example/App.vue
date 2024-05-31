@@ -16,12 +16,12 @@
       default-leaf-node-name="new leaf"
       v-bind:default-expanded="true"
     > -->
-      <!-- <template v-slot:leafNameDisplay="slotProps">
+      <template v-slot:leafNameDisplay="slotProps">
         <span>
           {{ slotProps.model.name }}
           <span class="muted">#{{ slotProps.model.id }}</span>
         </span>
-      </template> -->
+      </template>
       <!-- eslint-disable vue/no-unused-vars -->
       <!-- <template v-slot:addTreeNodeIcon="slotProps">
         <span class="icon">📂</span>
@@ -36,20 +36,20 @@
       <template v-slot:delNodeIcon="slotProps">
         <span class="icon">✂️</span>
       </template> -->
-      <!-- <template v-slot:leafNodeIcon="slotProps">
+      <template v-slot:leafNodeIcon="slotProps">
         <span class="icon">🍃</span>
-      </template> -->
-      <!-- <template v-slot:treeNodeIcon="slotProps">
+      </template>
+      <template v-slot:treeNodeIcon="slotProps">
         <span class="icon">
           {{
             slotProps.model.children &&
             slotProps.model.children.length > 0 &&
             !slotProps.expanded
               ? "🌲"
-              : ""
+              : "🌲"
           }}</span
         >
-      </template> -->
+      </template>
     </vue-tree>
     <button @click="getNewTree">Get new tree</button>
     <pre>{{ newTree }}</pre>
@@ -57,7 +57,8 @@
 </template>
 <script setup>
 import { reactive, ref } from "vue";
-import { VueTree, getTreeData, TreeNode } from "../src";
+import { getTreeData, TreeNode } from "~/Tree/src/treeModel";
+import VueTree from "~/Tree";
 import tree from "./tree.json";
 const mockTree = [
   {

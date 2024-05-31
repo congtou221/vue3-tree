@@ -1,13 +1,13 @@
-type Handler = (...args: any[]) => void;
-
-type LegacyEventTarget = EventTarget & {
-  attachEvent?: (eventName: string, callback: any) => void;
-  detachEvent?: (eventName: string, callback: any) => void;
-};
+import {
+  Handler,
+  ITreeNodeInstance,
+  LegacyEventTarget,
+  TreeNodeData,
+} from "typings/treeComponent";
 
 let handlerCache: Handler | null = null;
 
-export const traverseTree = (root: TreeNode): TreeNode => {
+export const traverseTree = (root: ITreeNodeInstance): TreeNode => {
   const newRoot: TreeNode | {} = {};
 
   for (const k in root) {
@@ -51,28 +51,22 @@ export const removeHandler = (element: LegacyEventTarget, type: string) => {
 };
 
 /**
- * TreeNode interface
- */
-interface TreeNodeData {
-  name: string;
-  isLeaf?: boolean;
-  id?: number;
-  dragDisabled?: boolean;
-  disabled?: boolean;
-  [key: string]: any;
-}
-
-/**
  * Tree node data struct
  * Created by ayou on 2017/7/20.
  */
 export class TreeNode {
   id: number;
-  parent: TreeNode | null;
-  children: TreeNode[] | null;
+  parent: ITreeNodeInstance | null;
+  children: ITreeNodeInstance[] | null;
   isLeaf: boolean;
   name: string | undefined;
   pid: number | undefined;
+  dragDisabled: boolean;
+  addLeafNodeDisabled: boolean;
+  addTreeNodeDisabled: boolean;
+  editNodeDisabled: boolean;
+  delNodeDisabled: boolean;
+  disabled: boolean;
 
   constructor(data: TreeNodeData) {
     const { id, isLeaf } = data;
@@ -80,6 +74,12 @@ export class TreeNode {
     this.parent = null;
     this.children = null;
     this.isLeaf = !!isLeaf;
+    this.dragDisabled = false;
+    this.addLeafNodeDisabled = false;
+    this.addTreeNodeDisabled = false;
+    this.editNodeDisabled = false;
+    this.delNodeDisabled = false;
+    this.disabled = false;
 
     // other params
     for (const k in data) {
@@ -123,7 +123,7 @@ export class TreeNode {
   }
 
   // remove child
-  _removeChild(child: TreeNode) {
+  _removeChild(child: ITreeNodeInstance) {
     for (let i = 0, len = this.children?.length || 0; i < len; i++) {
       if (this.children![i].id === child.id) {
         (this.children || []).splice(i, 1);
@@ -132,7 +132,7 @@ export class TreeNode {
     }
   }
 
-  isTargetChild(target: TreeNode) {
+  isTargetChild(target: ITreeNodeInstance) {
     let parent = target.parent;
     while (parent) {
       if (parent === this) {
@@ -143,7 +143,7 @@ export class TreeNode {
     return false;
   }
 
-  moveInto(target: TreeNode) {
+  moveInto(target: ITreeNodeInstance) {
     if (this.name === "root" || this === target) {
       return;
     }
@@ -159,7 +159,6 @@ export class TreeNode {
     }
 
     this.parent?._removeChild(this);
-    console.log(111, this.parent);
     this.parent = target;
     this.pid = target.id;
     if (!target.children) {
@@ -168,7 +167,7 @@ export class TreeNode {
     target.children.unshift(this);
   }
 
-  findChildIndex(child: TreeNode) {
+  findChildIndex(child: ITreeNodeInstance) {
     let index = -1;
     for (
       let i = 0, len = (this.children ? this.children : []).length;
@@ -183,7 +182,7 @@ export class TreeNode {
     return index;
   }
 
-  _canInsert(target: TreeNode) {
+  _canInsert(target: ITreeNodeInstance) {
     if (this.name === "root" || this === target) {
       return false;
     }
@@ -199,7 +198,7 @@ export class TreeNode {
     return true;
   }
 
-  insertBefore(target: TreeNode) {
+  insertBefore(target: ITreeNodeInstance) {
     if (!this._canInsert(target)) return;
 
     const pos = target.parent?.findChildIndex(target);
@@ -212,7 +211,7 @@ export class TreeNode {
     }
   }
 
-  insertAfter(target: TreeNode) {
+  insertAfter(target: ITreeNodeInstance) {
     if (!this._canInsert(target)) return;
 
     const pos = target.parent?.findChildIndex(target);
@@ -234,7 +233,7 @@ export class TreeNode {
  * Tree data model
  */
 
-export const getTreeData = (data: TreeNodeData[]) => {
+export const getTreeData = (data: TreeNodeData[]): ITreeNodeInstance => {
   const root = new TreeNode({ name: "root", isLeaf: false, id: 0 });
 
   const initNode = (node: TreeNode, data: TreeNodeData[]) => {

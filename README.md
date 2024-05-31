@@ -7,46 +7,48 @@
 ## Usage
 
 ```HTML
-<VueTree :model="mockData"></VueTree>
+
 ```
 
-```javascript
-import { VueTree, getTreeData } from "sailing-vuetree";
+```vue
+<template>
+  <vue-tree :model="mockData"></vue-tree>
+</template>
+<script lang="ts" setup>
+import { getTreeData, VueTree } from "sailing-vuetree";
+import type { ITreeNodeInstance, TreeNodeData } from 'sailing-vuetree/lib/typings';
 
-export default {
-  data: {
-    mockData: getTreeData([
+const mockTree: Array<TreeNodeData> = [
+  {
+    name: "Node 1",
+    id: 1,
+    pid: 0,
+    isLeaf: false,
+    children: [
       {
-        name: "Node 1",
-        id: 1,
-        pid: 0,
-        isLeaf: false,
-        children: [
-          {
-            name: "Node 1-2",
-            id: 2,
-            isLeaf: true,
-            pid: 1,
-          },
-        ],
+        name: "Node 1-2",
+        id: 2,
+        isLeaf: true,
+        pid: 1,
       },
-      {
-        name: "Node 2",
-        id: 3,
-        pid: 0,
-        disabled: true,
-      },
-      {
-        name: "Node 3",
-        id: 4,
-        pid: 0,
-      },
-    ]),
+    ],
   },
-  components: {
-    VueTree,
+  {
+    name: "Node 2",
+    id: 3,
+    pid: 0,
+    disabled: true,
   },
-};
+  {
+    name: "Node 3",
+    id: 4,
+    pid: 0,
+  },
+];
+const treeInstance: ITreeNodeInstance = getTreeData(mockTree);
+const mockData = reactive(treeInstance);
+
+</script>
 ```
 
 ## API
