@@ -56,10 +56,10 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref } from "vue";
-import { getTreeData, TreeNode } from "~/Tree/src/treeModel";
-import VueTree from "~/Tree";
-import tree from "./tree.json";
+import { reactive, ref } from "vue"
+import { getTreeData, TreeNode } from "~/Tree/src/treeModel"
+import VueTree from "~/Tree"
+import tree from "./tree.json"
 const mockTree = [
   {
     name: "Node 1",
@@ -90,74 +90,74 @@ const mockTree = [
     id: 4,
     pid: 0,
   },
-];
+]
 
-const newTree = ref({});
-const data = reactive(getTreeData(tree));
+const newTree = ref({})
+const data = reactive(getTreeData(mockTree))
 
 const onDel = (node) => {
-  console.log("onDel", node);
-  node.remove();
-};
+  console.log("onDel", node)
+  node.remove()
+}
 
 const onEndEdit = (params) => {
-  console.log("onEndEdit", params);
-};
+  console.log("onEndEdit", params)
+}
 
 const onChangeName = (params) => {
-  console.log("onChangeName", params);
-};
+  console.log("onChangeName", params)
+}
 
 const onAddNode = (params) => {
-  console.log("onAddNode", params);
-};
+  console.log("onAddNode", params)
+}
 
 const onClick = (params) => {
-  console.log("onClick", params);
-};
+  console.log("onClick", params)
+}
 
 const drop = ({ node, src, target }) => {
-  console.log("drop", node, src, target);
-};
+  console.log("drop", node, src, target)
+}
 
 const dropBefore = ({ node, src, target }) => {
-  console.log("drop-before", node, src, target);
-};
+  console.log("drop-before", node, src, target)
+}
 
 const dropAfter = ({ node, src, target }) => {
-  console.log("drop-after", node, src, target);
-};
+  console.log("drop-after", node, src, target)
+}
 
 const addNode = () => {
-  const node = new TreeNode({ name: "new node", isLeaf: false });
-  data.addChildren(node);
-};
+  const node = new TreeNode({ name: "new node", isLeaf: false })
+  data.addChildren(node)
+}
 
 const formatJson = (jsonObj) => {
-  return JSON.stringify(jsonObj, null, 2); // 2 表示使用2个空格作为缩进
-};
+  return JSON.stringify(jsonObj, null, 2) // 2 表示使用2个空格作为缩进
+}
 
 const getNewTree = () => {
   function _dfs(oldNode) {
-    const newNode = {};
+    const newNode = {}
 
     for (const k in oldNode) {
       if (k !== "children" && k !== "parent") {
-        newNode[k] = oldNode[k];
+        newNode[k] = oldNode[k]
       }
     }
 
     if (oldNode && oldNode.children && oldNode.children.length > 0) {
-      newNode.children = [];
+      newNode.children = []
       for (const child of oldNode.children) {
-        newNode.children.push(_dfs(child));
+        newNode.children.push(_dfs(child))
       }
     }
-    return newNode;
+    return newNode
   }
 
-  newTree.value = formatJson(_dfs(data));
-};
+  newTree.value = formatJson(_dfs(data))
+}
 </script>
 
 <style lang="less" rel="stylesheet/less" scoped>

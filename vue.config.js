@@ -1,5 +1,4 @@
-const path = require("path");
-const AutoImport = require("unplugin-auto-import/webpack").default;
+const path = require("path")
 module.exports = {
   css: {
     extract: false,
@@ -7,7 +6,7 @@ module.exports = {
   configureWebpack: (config) => {
     config.externals = {
       vue: "vue",
-    };
+    }
   },
   chainWebpack: (config) => {
     config.module
@@ -21,17 +20,17 @@ module.exports = {
         appendTsSuffixTo: [/\.vue$/],
         transpileOnly: true, // 忽略类型检查，仅编译
       })
-      .end();
+      .end()
 
     // 添加一个排除规则
     config.module
       .rule("ts-exclude")
       .test(/\.d\.tsx$/)
       .exclude.add(path.resolve(__dirname, "src"))
-      .end();
+      .end()
 
-    config.resolve.extensions.add(".ts").add(".js").add(".vue").add(".json");
+    config.resolve.extensions.add(".ts").add(".js").add(".vue").add(".json")
 
-    config.resolve.alias.set("~", path.resolve("packages"));
+    config.resolve.alias.set("~", path.resolve("packages"))
   },
-};
+}
