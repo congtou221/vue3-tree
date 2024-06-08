@@ -4,8 +4,10 @@ module.exports = {
     extract: false,
   },
   configureWebpack: (config) => {
-    config.externals = {
-      vue: "vue",
+    if(process.env.NODE_ENV !== "development") {
+      config.externals = {
+        vue: "vue",
+      }
     }
   },
   chainWebpack: (config) => {

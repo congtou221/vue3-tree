@@ -16,6 +16,27 @@
     "no-unused-vars": "off",
     "no-undef": "off",
     "no-empty-function": "off",
+    "vue/html-self-closing": [
+      "error",
+      {
+        "html": {
+          "void": "always", // 允许自闭合在 HTML 空元素上
+        },
+        "svg": "always",
+        "math": "always",
+      },
+    ],
+    "vue/max-attributes-per-line": [
+      "off", // 或者
+      {
+        "singleline": 0, // 允许单行无限个属性
+        "multiline": {
+          "max": 1, // 每行最多一个属性，如果超过一个，则换行
+          "allowFirstLine": true, // 允许在第一行有一个以上的属性
+        },
+      },
+    ],
+    "vue/html-indent": "off",
   },
   "settings": {
     "vue": {

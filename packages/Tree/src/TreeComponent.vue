@@ -8,19 +8,13 @@
       @click="click"
     >
       <div
+        v-if="showExpandedUp"
         class="vtl-border vtl-up"
         :class="{
-          'vtl-active': isDragEnterUp,
+          'vtl-active': model.dragState.isDragEnterUp,
           'vtl-anchor-active':
-            props.isDragEnterUpAnchor && upTriggeredByUpAnchorIndex === 1,
+            model.parent && model.parent.dragState.isDragEnterUpAnchor,
         }"
-        v-if="
-          model.parent &&
-          model.parent.children &&
-          model.parent.children.length > 0 &&
-          model.parent.findChildIndex(model) === 0 &&
-          expanded
-        "
         @drop="dropBefore"
         @dragenter="dragEnterUp"
         @dragover="dragOverUp"
@@ -112,7 +106,7 @@
         </div>
       </div>
       <div v-if="showAddCard" class="vtl-actived-menu-wrapper">
-        <div class="vtl-actived-menu" ref="addCard">
+        <div ref="addCard" class="vtl-actived-menu">
           <ul class="vtl-menu-list">
             <li
               v-if="!model.editNodeDisabled"
@@ -139,10 +133,10 @@
             </li>
           </ul>
         </div>
-        <div class="vtl-actived-menu-bg" @click="clickHandler"></div>
+        <div class="vtl-actived-menu-bg" @click="clickHandler" />
       </div>
       <div v-if="showMenuCard" class="vtl-actived-menu-wrapper">
-        <div class="vtl-actived-menu" ref="menuCard">
+        <div ref="menuCard" class="vtl-actived-menu">
           <ul class="vtl-menu-list">
             <li
               v-if="!model.editNodeDisabled"
@@ -169,16 +163,14 @@
             </li>
           </ul>
         </div>
-        <div class="vtl-actived-menu-bg" @click="clickHandler"></div>
+        <div class="vtl-actived-menu-bg" @click="clickHandler" />
       </div>
       <div
-        v-if="!(model.children && model.children.length > 0 && expanded)"
+        v-if="showExpandedBottom"
         class="vtl-border vtl-bottom"
         :class="{
-          'vtl-active': isDragEnterBottom,
-          'vtl-anchor-active':
-            props.showBottomIsDragEnterBottomAnchorIds &&
-            props.showBottomIsDragEnterBottomAnchorIds.includes(model.id),
+          'vtl-active': model.dragState.isDragEnterBottom,
+          'vtl-anchor-active': model.dragState.isDragEnterBottomByPreAnchor,
         }"
         @drop="dropAfter"
         @dragenter="dragEnterBottom"
@@ -196,16 +188,11 @@
       }"
     >
       <div
-        v-if="
-          model.name !== 'root' &&
-          model.children &&
-          model.children.length > 0 &&
-          expanded
-        "
+        v-if="showUpAnchor"
         class="vtl-border vtl-up-anchor"
         :class="{
-          'vtl-active-shade': isChildDragEnterUp,
-          'vtl-active': isDragEnterUpAnchor,
+          'vtl-active-shade': model.children[0].dragState.isDragEnterUp,
+          'vtl-active': model.dragState.isDragEnterUpAnchor,
         }"
         @drop="dropAfterUpAnchor"
         @dragenter="dragEnterUpAnchor"
@@ -220,26 +207,8 @@
         :default-leaf-node-name="defaultLeafNodeName"
         :default-expanded="defaultExpanded"
         :model="model"
-        :isDragEnterUpAnchor="props.isDragEnterUpAnchor || isDragEnterUpAnchor"
-        :isDragEnterBottomAnchor="
-          props.isDragEnterBottomAnchor || isDragEnterBottomAnchor
-        "
-        :upTriggeredByUpAnchorIndex="upTriggeredByUpAnchorIndex"
-        :isLastChildren="isLastChildren"
-        :showBottomIsDragEnterBottomAnchorIds="
-          showBottomIsDragEnterBottomAnchorIds.length
-            ? showBottomIsDragEnterBottomAnchorIds
-            : props.showBottomIsDragEnterBottomAnchorIds
-        "
-        @enter-bottom="onChildEnterBottom"
-        @enter-up="onChildEnterUp"
-        @leave-bottom="onChildLeaveBottom"
-        @leave-up="onChildLeaveUp"
-        @enter-bottom-anchor="onChildEnterBottomAnchor"
-        @leave-bottom-anchor="onChildLeaveBottomAnchor"
-        @leave-up-anchor="onChildLeaveUpAnchor"
       >
-        <template v-slot:leafNameDisplay="slotProps">
+        <template #leafNameDisplay="slotProps">
           <slot name="leafNameDisplay" v-bind="slotProps" />
         </template>
         <!-- <template #addTreeNodeIcon="slotProps">
@@ -254,30 +223,21 @@
         <template #delNodeIcon="slotProps">
           <slot name="delNodeIcon" v-bind="slotProps" />
         </template> -->
-        <template v-slot:leafNodeIcon="slotProps">
+        <template #leafNodeIcon="slotProps">
           <slot name="leafNodeIcon" v-bind="slotProps" />
         </template>
-        <template v-slot:treeNodeIcon="slotProps">
+        <template #treeNodeIcon="slotProps">
           <slot name="treeNodeIcon" v-bind="slotProps" />
         </template>
       </component>
     </div>
     <div
-      v-if="
-        model.name !== 'root' &&
-        model.children &&
-        model.children.length > 0 &&
-        expanded &&
-        !isLastChildOfTree(model, store.wholeTreeNode)
-      "
+      v-if="showBottomAnchor"
       class="vtl-border vtl-bottom-anchor"
       :class="{
-        'vtl-active': isDragEnterBottomAnchor,
-        'vtl-active-anchor':
-          props.showBottomIsDragEnterBottomAnchorIds &&
-          props.showBottomIsDragEnterBottomAnchorIds.includes(model.id),
-        'vtl-active-shade':
-          isChildDragEnterBottom || isDragEnterBottomAnchorByChild,
+        'vtl-active': model.dragState.isDragEnterBottomAnchor,
+        'vtl-active-anchor': model.dragState.isDragEnterBottomAnchorByPreAnchor,
+        'vtl-active-shade': model.dragState.isDragEnterBottomAnchorByChild,
       }"
       @drop="dropAfterBottomAnchor"
       @dragenter="dragEnterBottomAnchor"
@@ -296,32 +256,22 @@ import {
   computed,
   ref,
   reactive,
-  nextTick,
-} from "vue"
-import { TreeNode, removeHandler } from "./treeModel"
-import eventBus from "~/eventBus"
-import store, { CompInOperationType } from "~/store"
-import { ITreeNodeInstance } from "typings/treeComponent"
-import {
-  isLastChildOfSubTree,
-  isLastChildrenOfSubTree,
-  isLastChildOfTree,
-} from "~/utils"
+} from "vue";
+import { TreeNode, removeHandler } from "./treeModel";
+import eventBus from "~/eventBus";
+import store, { CompInOperationType } from "~/store";
+import { ITreeNodeInstance } from "typings/treeComponent";
+import { isLastChildOfTree } from "~/utils";
 
 const props = defineProps<{
-  model: ITreeNodeInstance
-  defaultLeafNodeName?: string
-  defaultTreeNodeName?: string
-  defaultAddTreeNodeTitle?: string
-  defaultAddLeafNodeTitle?: string
-  defaultExpanded?: boolean
-  editable?: boolean
-  isDragEnterBottomAnchor?: boolean
-  isDragEnterUpAnchor?: boolean
-  upTriggeredByUpAnchorIndex?: number
-  isLastChildren?: boolean
-  showBottomIsDragEnterBottomAnchorIds?: number[]
-}>()
+  model: ITreeNodeInstance;
+  defaultLeafNodeName?: string;
+  defaultTreeNodeName?: string;
+  defaultAddTreeNodeTitle?: string;
+  defaultAddLeafNodeTitle?: string;
+  defaultExpanded?: boolean;
+  editable?: boolean;
+}>();
 
 const emit = defineEmits([
   "change-name",
@@ -332,68 +282,66 @@ const emit = defineEmits([
   "drop",
   "drop-before",
   "drop-after",
-  "enter-up",
-  "enter-bottom",
-  "leave-up",
-  "leave-bottom",
-  "enter-bottom-anchor",
-  "leave-bottom-anchor",
-  "leave-up-anchor",
-  "enter-up-anchor",
-])
-const DefaultTreedNode = new TreeNode({ name: "root", isLeaf: false, id: 0 })
-const isHover = ref<boolean>(false)
-const editable = ref<boolean>(props.editable || false)
-const isDragEnterUp = ref<boolean>(false)
-const isDragEnterUpAnchor = ref<boolean>(props.isDragEnterUpAnchor || false)
-const isDragEnterBottom = ref<boolean>(false)
-const isDragEnterBottomAnchor = ref<boolean>(
-  props.isDragEnterBottomAnchor || false
-)
-const isChildDragEnterBottom = ref<boolean>(false)
-const isChildDragEnterUp = ref<boolean>(false)
-const isDragEnterBottomAnchorByChild = ref<boolean>(false)
-const isDragEnterUpAnchorByChild = ref<boolean>(false)
+]);
+const DefaultTreedNode = new TreeNode({ name: "root", isLeaf: false, id: 0 });
+const isHover = ref<boolean>(false);
+const editable = ref<boolean>(props.editable || false);
 
-const showBottomIsDragEnterBottomAnchorIds = ref<number[]>([])
-
-const isDragEnterNode = ref<boolean>(false)
-const expanded = ref<boolean>(props.defaultExpanded || true)
-const model = reactive<ITreeNodeInstance>(props?.model || DefaultTreedNode)
+const isDragEnterNode = ref<boolean>(false);
+const expanded = ref<boolean>(props.defaultExpanded || true);
+const model = reactive<ITreeNodeInstance>(props?.model || DefaultTreedNode);
 // 定义一个ref来引用DOM元素
-const menuCard = ref<HTMLDivElement | null>(null)
-const addCard = ref<HTMLDivElement | null>(null)
-const showActiveStyle = ref<boolean>(false)
-const showMenuCard = ref<boolean>(false)
-const showAddCard = ref<boolean>(false)
+const menuCard = ref<HTMLDivElement | null>(null);
+const addCard = ref<HTMLDivElement | null>(null);
+const showActiveStyle = ref<boolean>(false);
+const showMenuCard = ref<boolean>(false);
+const showAddCard = ref<boolean>(false);
 
-const fakeDragNode = ref<HTMLDivElement | null>(null)
+const fakeDragNode = ref<HTMLDivElement | null>(null);
 
-const asyncComponentReady = ref(false)
-const nodeInput = ref<HTMLInputElement | null>(null)
+const asyncComponentReady = ref(false);
+const nodeInput = ref<HTMLInputElement | null>(null);
 
-const isLastChild = computed(() =>
-  isLastChildOfSubTree(model, store.wholeTreeNode)
-)
+let lastenter = ref<EventTarget | null>(null);
 
-const isLastChildren = computed(
-  () =>
-    isLastChildrenOfSubTree(model, store.wholeTreeNode) || props.isLastChildren
-)
+const showExpandedUp = computed(() => {
+  return (
+    model.parent &&
+    model.parent.children &&
+    model.parent.children.length > 0 &&
+    model.parent.findChildIndex(model) === 0 &&
+    expanded
+  );
+});
 
-const upTriggeredByUpAnchorIndex = computed(
-  () =>
-    (props.upTriggeredByUpAnchorIndex || 0) +
-    (props.isDragEnterUpAnchor ? 1 : 0)
-)
+const showExpandedBottom = computed(
+  () => !(model.children && model.children.length > 0 && expanded)
+);
 
+const showUpAnchor = computed(() => {
+  return (
+    model.name !== "root" &&
+    model.children &&
+    model.children.length > 0 &&
+    expanded
+  );
+});
+const showBottomAnchor = computed(() => {
+  return (
+    model.name !== "root" &&
+    model.children &&
+    model.children.length > 0 &&
+    expanded &&
+    !isLastChildOfTree(model, store.wholeTreeNode)
+  );
+});
 const caretClass = computed(() =>
   expanded.value ? "vtl-icon-caret-down" : "vtl-icon-caret-right"
-)
+);
 
 const isFolder = computed(() => {
-  return Boolean(model.children && model.children.length)
-})
+  return Boolean(model.children && model.children.length);
+});
 
 const treeNodeClass = computed(() => ({
   "vtl-node-main": true,
@@ -401,536 +349,470 @@ const treeNodeClass = computed(() => ({
   "vtl-drag-disabled": model.dragDisabled,
   "vtl-disabled": model.disabled,
   "vtl-selected": showActiveStyle.value,
-}))
+}));
 
 // 在数据操作函数中加入异常处理逻辑
 const updateName = (e: Event) => {
   try {
-    const target = e.target as HTMLInputElement
-    const model = props.model
-    const oldName = model.name
+    const target = e.target as HTMLInputElement;
+    const model = props.model;
+    const oldName = model.name;
     if (target && target.type === "text") {
-      model.changeName(target.value)
+      model.changeName(target.value);
       eventBus.emit("change-name", {
         id: model.id,
         oldName: oldName,
         newName: target.value,
         node: model,
-      })
+      });
     }
   } catch (error) {
-    console.error("Error updating name:", error)
+    console.error("Error updating name:", error);
   }
-}
+};
 
-const onChildEnterUp = (e: Event) => {
-  isChildDragEnterUp.value = true
-}
-
-const onChildEnterBottom = (level: number) => {
-  isChildDragEnterBottom.value = true
-  const isLast = isLastChildOfSubTree(model, store.wholeTreeNode)
-
-  if (isLast || level > 0) {
-    emit("enter-bottom", --level)
-  }
-}
-
-const onChildLeaveUp = (e: Event) => {
-  isChildDragEnterUp.value = false
-}
-
-const onChildLeaveBottom = (e: Event) => {
-  isChildDragEnterBottom.value = false
-  emit("leave-bottom")
-}
-
-const onChildEnterBottomAnchor = (isLast: boolean, level: number) => {
-  isDragEnterBottomAnchorByChild.value = true
-  if (level > 0) {
-    emit("enter-bottom-anchor", isLast, --level)
-  }
-}
-const onChildLeaveBottomAnchor = () => {
-  isDragEnterBottomAnchorByChild.value = false
-  showBottomIsDragEnterBottomAnchorIds.value = []
-  emit("leave-bottom-anchor")
-}
-const onChildLeaveUpAnchor = () => {
-  isChildDragEnterUp.value = false
-}
 const delNode = () => {
-  store.setShowMenuCardId(null)
-  eventBus.emit("delete-node", props.model)
-  props.model.remove()
-}
+  store.setShowMenuCardId(null);
+  eventBus.emit("delete-node", props.model);
+  props.model.remove();
+};
 
 const setEditable = () => {
-  editable.value = true
-  store.setShowMenuCardId(null)
+  editable.value = true;
+  store.setShowMenuCardId(null);
   watchEffect(() => {
     // 确保在 DOM 更新后聚焦并设置光标位置
     if (nodeInput.value) {
-      nodeInput.value.focus()
-      nodeInput.value.setSelectionRange(0, nodeInput.value.value.length)
+      nodeInput.value.focus();
+      nodeInput.value.setSelectionRange(0, nodeInput.value.value.length);
     }
-  })
-}
+  });
+};
 const setUnEditable = (e: KeyboardEvent | FocusEvent) => {
-  if (editable.value === false) return
-  editable.value = false
-  const target = e.target as HTMLInputElement
-  const model = props.model
-  const oldName = model.name
+  if (editable.value === false) return;
+  editable.value = false;
+  const target = e.target as HTMLInputElement;
+  const model = props.model;
+  const oldName = model.name;
   if (target && target.type === "text") {
-    model.changeName(target.value)
+    model.changeName(target.value);
     eventBus.emit("change-name", {
       id: model.id,
       oldName: oldName,
       newName: target.value,
       eventType: "blur",
-    })
+    });
     eventBus.emit("end-edit", {
       id: model.id,
       oldName: oldName,
       newName: target.value,
-    })
+    });
   }
-}
+};
 
 const toggle = async () => {
   if (isFolder) {
-    expanded.value = !expanded.value
+    expanded.value = !expanded.value;
   }
-}
+};
 const mouseOver = () => {
-  if (model.disabled) return
-  isHover.value = true
-}
+  if (model.disabled) return;
+  isHover.value = true;
+};
 const mouseOut = () => {
-  isHover.value = false
-}
+  isHover.value = false;
+};
 
 const click = () => {
   eventBus.emit("click", {
     toggle: toggle,
     ...props.model,
-  })
-  store.setActivatedKey(model.id)
-}
+  });
+  store.setActivatedKey(model.id);
+};
 
 const addChild = (isLeaf: boolean) => {
   const name = isLeaf
     ? props.defaultLeafNodeName || "Leaf Node"
-    : props.defaultTreeNodeName || "Tree Node"
-  expanded.value = true
-  var node = new TreeNode({ name, isLeaf })
-  props.model.addChildren(node)
-  eventBus.emit("add-node", node)
-}
+    : props.defaultTreeNodeName || "Tree Node";
+  expanded.value = true;
+  var node = new TreeNode({ name, isLeaf });
+  props.model.addChildren(node);
+  eventBus.emit("add-node", node);
+};
 
 const dragStart = (e: DragEvent) => {
   if (!(props.model.dragDisabled || props.model.disabled)) {
-    store.setComInOperation(props as unknown as CompInOperationType)
-    store.setDragging(model.id)
-    store.setComInOperationExpaned(expanded.value)
+    store.setComInOperation(props as unknown as CompInOperationType);
+    store.setDragging(model.id);
+    store.setComInOperationExpaned(expanded.value);
 
-    initFakeDragNode()
-    dragWithCustomImage(e)
+    initFakeDragNode();
+    dragWithCustomImage(e);
 
-    // if (expanded.value) {
-    expanded.value = false
-    // }
+    expanded.value = false;
 
     // for firefox
-    if (!e.dataTransfer) return
-    e.dataTransfer.setData("data", "data")
-    e.dataTransfer.effectAllowed = "move"
-    return true
+    if (!e.dataTransfer) return;
+    e.dataTransfer.setData("data", "data");
+    e.dataTransfer.effectAllowed = "move";
+    return true;
   }
-  return false
-}
+  return false;
+};
 
 function dragWithCustomImage(event: DragEvent) {
-  if (!fakeDragNode.value) return
-  fakeDragNode.value.innerHTML = model.name || ""
-  var dt = event.dataTransfer
-  if (!dt) return
-  dt.setData("text/plain", "Data to Drag")
-  dt.setDragImage(fakeDragNode.value, 0, -10)
+  if (!fakeDragNode.value) return;
+  fakeDragNode.value.innerHTML = model.name || "";
+  var dt = event.dataTransfer;
+  if (!dt) return;
+  dt.setData("text/plain", "Data to Drag");
+  dt.setDragImage(fakeDragNode.value, 0, -10);
 }
 
 const dragEnd = () => {
-  expanded.value = store.operationExpanded
-  store.setComInOperation(null)
-  removeFakeDragNode()
-}
+  expanded.value = store.operationExpanded;
+  store.setComInOperation(null);
+  removeFakeDragNode();
+};
 
 const dragOver = (e: DragEvent) => {
-  e.preventDefault()
-  return true
-}
+  e.preventDefault();
+  return true;
+};
 
-let lastenter = ref<EventTarget | null>(null)
 const dragEnter = (e: DragEvent) => {
-  if (!store.compInOperation) return
+  if (!store.compInOperation) return;
 
-  if (store.compInOperation?.model.id === props.model.id) return
+  if (store.compInOperation?.model.id === props.model.id) return;
 
-  isDragEnterNode.value = true
-  lastenter.value = e.target
-  console.log("#dragEnter", e.target)
-}
+  isDragEnterNode.value = true;
+  lastenter.value = e.target;
+  // console.log("#dragEnter", e.target);
+};
 
 const dragLeave = (e: DragEvent) => {
   if (e.target === lastenter.value) {
-    isDragEnterNode.value = false
-    console.log("#dragLeave", e.target)
+    isDragEnterNode.value = false;
+    // console.log("#dragLeave", e.target);
   }
-}
+};
 
 const drop = () => {
-  if (!store.compInOperation) return
-  const oldParent = store.compInOperation.model.parent
-  const model = props.model
-  store.compInOperation.model.moveInto(model)
-  isDragEnterNode.value = false
+  if (!store.compInOperation) return;
+
+  isDragEnterNode.value = false;
+
+  const oldParent = store.compInOperation.model.parent;
+  const model = props.model;
+  store.compInOperation.model.moveInto(model);
+
   eventBus.emit("drop", {
     target: model,
     node: store.compInOperation.model,
     src: oldParent,
-  })
-  removeFakeDragNode()
-}
+  });
+  removeFakeDragNode();
+};
 
 const dragEnterUp = () => {
-  if (!store.compInOperation) return
-  isDragEnterUp.value = true
-
-  emit("enter-up")
-}
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterUp = true;
+};
 const dragOverUp = (e: DragEvent) => {
-  e.preventDefault()
-  return true
-}
+  e.preventDefault();
+  return true;
+};
 const dragLeaveUp = () => {
-  if (!store.compInOperation) return
-  isDragEnterUp.value = false
-  emit("leave-up")
-  emit("leave-up-anchor")
-}
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterUp = false;
+};
 const dragEnterUpAnchor = () => {
-  if (!store.compInOperation) return
-  isDragEnterUpAnchor.value = true
-}
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterUpAnchor = true;
+};
 const dragOverUpAnchor = (e: DragEvent) => {
-  e.preventDefault()
-  return true
-}
+  e.preventDefault();
+  return true;
+};
 const dragLeaveUpAnchor = () => {
-  if (!store.compInOperation) return
-  isDragEnterUpAnchor.value = false
-  emit("leave-up")
-}
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterUpAnchor = false;
+};
 const dropBefore = () => {
-  if (!store.compInOperation) return
-  const oldParent = store.compInOperation.model.parent
-  const model = props.model
-  store.compInOperation.model.insertBefore(model)
-  isDragEnterUp.value = false
-  isChildDragEnterUp.value = false
+  if (!store.compInOperation) return;
+
+  const oldParent = store.compInOperation.model.parent;
+  const model = props.model;
+  model.dragState.isDragEnterUp = false;
+
+  store.compInOperation.model.insertBefore(model);
   eventBus.emit("drop-before", {
     target: model,
     node: store.compInOperation.model,
     src: oldParent,
-  })
-  emit("leave-up-anchor")
-}
-const hasBrothers = computed(
-  () =>
-    model.parent && model.parent.children && model.parent?.children?.length > 1
-  // 倒数第二个兄弟
-)
-const dragEnterBottom = () => {
-  if (!store.compInOperation) return
-  isDragEnterBottom.value = true
+  });
+};
 
-  let node: TreeNode | null = model.parent
-  let _model: ITreeNodeInstance | null = model
-  let level = 0
-
-  while (
-    node &&
-    node.children &&
-    node.name !== "root" &&
-    _model &&
-    node?.findChildIndex(_model) === node.children?.length - 1
-  ) {
-    level++
-    node = node.parent
-    _model = _model?.parent || null
-  }
-  if (
-    (!model.children &&
-      model.parent &&
-      model.parent.children &&
-      model.parent?.findChildIndex(model) ===
-        model.parent.children?.length - 1 &&
-      level > 0) ||
-    isLastChild.value
-  )
-    emit("enter-bottom", --level)
-}
+const dragEnterBottom = (e: DragEvent) => {
+  e.stopPropagation();
+  e.preventDefault();
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterBottom = true;
+  // console.log("进入底部", model.id);
+  lightPreAnchor(true);
+};
 const dragOverBottom = (e: DragEvent) => {
-  e.preventDefault()
-  return true
-}
+  e.preventDefault();
+  return true;
+};
 const dragLeaveBottom = () => {
-  if (!store.compInOperation) return
-  isDragEnterBottom.value = false
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterBottom = false;
+  // console.log("离开底部锚点", model);
+  lightPreAnchor();
+};
 
-  emit("leave-bottom")
-}
-const dragEnterBottomAnchor = () => {
-  if (!store.compInOperation) return
-  isDragEnterBottomAnchor.value = true
-
-  let node: TreeNode | null = model.parent
-  let _model: ITreeNodeInstance | null = model
-  let level = 0
+const lightPreAnchor = (lightup?: boolean) => {
+  let node: TreeNode | null = model.parent;
+  let _model: ITreeNodeInstance | null = model;
   while (
     node &&
     node.children &&
-    node.name !== "root" &&
     _model &&
     node?.findChildIndex(_model) === node.children?.length - 1
+    // 很有趣，如果是取消点亮效果，就不能按照最后一个节点来处理，因为此时可能已经改变了数据结构
   ) {
-    level++
-    node = node.parent
-    _model = _model?.parent || null
+    node.dragState.isDragEnterBottomAnchorByChild = lightup || false;
+    // console.log("激活前方锚点", node.id, lightup);
+    node = node.parent;
+    _model = _model?.parent || null;
   }
+  if (node && node.children?.length == 1)
+    node.dragState.isDragEnterBottomAnchorByChild = lightup || false;
+};
 
-  let nextLevel = 0
-  node = model
-  while (node && node.children) {
-    nextLevel++
-    node = node.children[node.children.length - 1]
-  }
-  let ifShow = false
-  let $model: ITreeNodeInstance | null = model
-  let triggeredIds = props.showBottomIsDragEnterBottomAnchorIds?.concat() || []
+const lightAfterAnchor = (lightup?: boolean) => {
+  let $model: ITreeNodeInstance | null = model;
 
-  while (nextLevel > 0) {
-    // ifShow =
-    //   ifShow ||
-    //   Boolean(
-    //     $model &&
-    //       $model.parent &&
-    //       $model.parent.children &&
-    //       $model.parent.findChildIndex($model) ===
-    //         $model?.parent.children.length - 1
-    // )
+  while ($model && $model.children) {
     let child: ITreeNodeInstance | null =
       $model && $model.children
         ? $model.children[$model.children.length - 1]
-        : null
-    if (child && child.id && !triggeredIds.includes(child.id)) {
-      // console.log(111222666, ifShow, child, triggeredIds)
-      console.log(111222, triggeredIds, child.id)
-      triggeredIds.push(child.id)
+        : null;
+    if (child) {
+      child.dragState.isDragEnterBottomByPreAnchor = lightup || false;
+      child.dragState.isDragEnterBottomAnchorByPreAnchor = lightup || false;
+      // console.log("激活后方锚点", child.id, lightup);
     }
-
-    $model = child
-    --nextLevel
+    $model = child;
   }
-
-  showBottomIsDragEnterBottomAnchorIds.value = triggeredIds
-
-  if (
-    model.parent &&
-    model.parent.children &&
-    model.parent?.findChildIndex(model) === model.parent.children?.length - 1 &&
-    level > 0
-  ) {
-    // console.log("enter-bottom-anchor1-after", isLastChildren.value, level)
-
-    emit("enter-bottom-anchor", isLastChildren.value, --level)
+  if ($model) {
+    $model.dragState.isDragEnterBottomByPreAnchor = lightup || false;
+    $model.dragState.isDragEnterBottomAnchorByPreAnchor = lightup || false;
+    // console.log("激活后方锚点", $model.id, lightup);
   }
-}
+};
+
+const dragEnterBottomAnchor = (e: DragEvent) => {
+  e.stopPropagation();
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterBottomAnchor = true;
+  // console.log("进入底部锚点");
+
+  lightPreAnchor(true);
+  lightAfterAnchor(true);
+};
 const dragOverBottomAnchor = (e: DragEvent) => {
-  e.preventDefault()
-  return true
-}
-const dragLeaveBottomAnchor = () => {
-  if (!store.compInOperation) return
-  isDragEnterBottomAnchor.value = false
-  showBottomIsDragEnterBottomAnchorIds.value = []
-  emit("leave-bottom-anchor")
-}
+  e.preventDefault();
+
+  return true;
+};
+const dragLeaveBottomAnchor = (e: DragEvent) => {
+  e.stopPropagation();
+  if (!store.compInOperation) return;
+  model.dragState.isDragEnterBottomAnchor = false;
+  // console.log("离开底部锚点dragLeaveBottomAnchor", model);
+  lightAfterAnchor();
+  lightPreAnchor();
+};
 const dropAfter = () => {
-  if (!store.compInOperation) return
-  if (!props.model) return
-  const oldParent = store.compInOperation.model?.parent
-  const model = props.model
-  store.compInOperation.model?.insertAfter(model)
-  isDragEnterBottom.value = false
+  if (!store.compInOperation) return;
+  if (!props.model) return;
+  // 样式处理
+  lightPreAnchor();
+  model.dragState.isDragEnterBottom = false;
+
+  // 样式处理在数据操作之前进行，因为数据结构的改变会影响样式层级判断
+  const oldParent = store.compInOperation.model?.parent;
+  const $model = props.model;
+  store.compInOperation.model?.insertAfter($model);
+
   eventBus.emit("drop-after", {
-    target: model,
+    target: $model,
     node: store.compInOperation.model,
     src: oldParent,
-  })
-  emit("leave-bottom")
-}
+  });
+  // console.log("离开底部锚点dropAfter", model);
+};
 const dropAfterBottomAnchor = () => {
-  if (!store.compInOperation) return
-  if (!props.model) return
-  const oldParent = store.compInOperation.model?.parent
-  const model = props.model
-  store.compInOperation.model?.insertAfter(model)
-  isDragEnterBottomAnchor.value = false
-  showBottomIsDragEnterBottomAnchorIds.value = []
+  if (!store.compInOperation) return;
+  if (!props.model) return;
+  const oldParent = store.compInOperation.model?.parent;
+  const model = props.model;
+
+  // 同样先处理样式
+  model.dragState.isDragEnterBottomAnchor = false;
+  // console.log("离开底部锚点dropAfterBottomAnchor", model);
+  lightAfterAnchor();
+  lightPreAnchor();
+
+  // 后处理数据
+
+  store.compInOperation.model?.insertAfter(model);
+
   eventBus.emit("drop-after-bottomanchor", {
     target: model,
     node: store.compInOperation.model,
     src: oldParent,
-  })
-  emit("leave-bottom-anchor")
-}
+  });
+};
 const dropAfterUpAnchor = () => {
-  if (!store.compInOperation) return
-  if (!props.model) return
-  const oldParent = store.compInOperation.model?.parent
-  const model = props.model
-  store.compInOperation.model?.insertAfter(model)
-  isDragEnterUpAnchor.value = false
+  if (!store.compInOperation) return;
+  if (!props.model) return;
+  const oldParent = store.compInOperation.model?.parent;
+  const model = props.model;
+  store.compInOperation.model?.insertAfter(model);
+  model.dragState.isDragEnterUpAnchor = false;
   eventBus.emit("drop-after-upanchor", {
     target: model,
     node: store.compInOperation.model,
     src: oldParent,
-  })
-}
+  });
+};
 
 const showMenu = () => {
   // store.setIsShowingCardType(CardType.Menu);
-  store.setShowMenuCardId(model.id)
-}
+  store.setShowMenuCardId(model.id);
+};
 
 const showAdd = () => {
-  store.setShowAddCardId(model.id)
+  store.setShowAddCardId(model.id);
   // store.setIsShowingCardType(CardType.Add);
-}
+};
 
 const clickHandler = (event: MouseEvent) => {
   const isMenuCard =
     menuCard.value &&
     event.target instanceof Node &&
-    menuCard.value.contains(event.target)
+    menuCard.value.contains(event.target);
 
   const isAddCard =
     addCard.value &&
     event.target instanceof Node &&
-    addCard.value.contains(event.target)
+    addCard.value.contains(event.target);
 
   // 如果点击发生在protectedElement之外
   if (!(isMenuCard || isAddCard)) {
-    store.setShowMenuCardId(null)
-    store.setShowAddCardId(null)
+    store.setShowMenuCardId(null);
+    store.setShowAddCardId(null);
     // store.setIsShowingCardType(null);
-    unregisterEventBusListeners()
+    unregisterEventBusListeners();
 
     // 如果需要的话，还可以阻止事件冒泡等进一步处理
-    event.stopPropagation()
+    event.stopPropagation();
   }
-}
+};
 
 const initFakeDragNode = () => {
-  const dragNode = document.createElement("div")
-  dragNode.className = "fake-drag-node"
+  const dragNode = document.createElement("div");
+  dragNode.className = "fake-drag-node";
   dragNode.style.cssText =
-    "position: fixed;left: -100%;background: #f5f5f5;z-index: 9999;width: 300px;font: 14px;padding: 0 14px;border-radius: 2px;"
-  fakeDragNode.value = dragNode
+    "position: fixed;left: -100%;background: #f5f5f5;z-index: 9999;width: 300px;font: 14px;padding: 0 14px;border-radius: 2px;";
+  fakeDragNode.value = dragNode;
 
-  document.body.appendChild(dragNode)
-}
+  document.body.appendChild(dragNode);
+};
 
 const removeFakeDragNode = () => {
-  const dragNode = fakeDragNode.value
+  const dragNode = fakeDragNode.value;
   if (dragNode && document.body.contains(dragNode)) {
-    document.body.removeChild(dragNode)
+    document.body.removeChild(dragNode);
   }
-}
+};
 const registerEventBusListeners = () => {
   eventBus.on("click", (params) => {
-    emit("click", params)
-  })
+    emit("click", params);
+  });
   eventBus.on("change-name", (params) => {
-    emit("change-name", params)
-  })
+    emit("change-name", params);
+  });
   eventBus.on("delete-node", (params) => {
-    emit("delete-node", params)
-  })
+    emit("delete-node", params);
+  });
   eventBus.on("end-edit", (params) => {
-    emit("end-edit", params)
-  })
+    emit("end-edit", params);
+  });
   eventBus.on("add-node", (params) => {
-    emit("add-node", params)
-  })
+    emit("add-node", params);
+  });
   eventBus.on("drop", (params) => {
-    emit("drop", params)
-  })
+    emit("drop", params);
+  });
   eventBus.on("drop-before", (params) => {
-    emit("drop-before", params)
-  })
+    emit("drop-before", params);
+  });
   eventBus.on("drop-after", (params) => {
-    emit("drop-after", params)
-  })
-}
+    emit("drop-after", params);
+  });
+};
 
 const unregisterEventBusListeners = () => {
-  eventBus.off("click")
-  eventBus.off("change-name")
-  eventBus.off("delete-node")
-  eventBus.off("end-edit")
-  eventBus.off("add-node")
-  eventBus.off("drop")
-  eventBus.off("drop-before")
-  eventBus.off("drop-after")
-}
+  eventBus.off("click");
+  eventBus.off("change-name");
+  eventBus.off("delete-node");
+  eventBus.off("end-edit");
+  eventBus.off("add-node");
+  eventBus.off("drop");
+  eventBus.off("drop-before");
+  eventBus.off("drop-after");
+};
 
 const AsyncDynamicComponent = defineAsyncComponent(() =>
   import("./TreeComponent.vue").then((module) => module.default)
-)
+);
 
 const loadAsyncComponent = async () => {
-  await AsyncDynamicComponent
-  asyncComponentReady.value = true
-}
+  await AsyncDynamicComponent;
+  asyncComponentReady.value = true;
+};
 
 const saveWholeTreeNode = () => {
   if (model.name === "root") {
-    store.setWholeTreeNode(model)
+    store.setWholeTreeNode(model);
   }
-}
+};
 
 onMounted(() => {
-  saveWholeTreeNode()
-  loadAsyncComponent()
-  registerEventBusListeners()
-})
+  saveWholeTreeNode();
+  loadAsyncComponent();
+  registerEventBusListeners();
+});
 
 onBeforeUnmount(() => {
-  unregisterEventBusListeners()
-  removeHandler(window, "keyup")
-})
+  unregisterEventBusListeners();
+  removeHandler(window, "keyup");
+});
 
 watchEffect(() => {
   showActiveStyle.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.activatedKey
+    !(model.disabled || model.dragDisabled) && model.id === store.activatedKey;
   showMenuCard.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.showMenuCardId
+    !(model.disabled || model.dragDisabled) &&
+    model.id === store.showMenuCardId;
   showAddCard.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.showAddCardId
-})
+    !(model.disabled || model.dragDisabled) && model.id === store.showAddCardId;
+});
 </script>
 
 <style lang="less" rel="stylesheet/less">
@@ -982,7 +864,6 @@ watchEffect(() => {
   .vtl-icon {
     /* use !important to prevent issues with browser extensions that change fonts */
     font-family: "icomoon" !important;
-    speak: none;
     font-style: normal;
     font-weight: normal;
     font-variant: normal;
@@ -1091,14 +972,20 @@ watchEffect(() => {
 
     &.vtl-active {
       border-bottom: 2px solid @click-color;
+
       /*background-color: blue;*/
       &::after {
-        content: ""; /* 伪元素必须有内容 */
-        position: absolute; /* 脱离文档流，便于定位 */
+        content: "";
+        /* 伪元素必须有内容 */
+        position: absolute;
+        /* 脱离文档流，便于定位 */
 
-        border-top: 3px solid transparent; /* 修改为顶部透明 */
-        border-bottom: 3px solid transparent; /* 修改为底部透明 */
-        border-left: 4px solid @click-color; /* 将有颜色的边设置为左侧，形成向右的箭头 */
+        border-top: 3px solid transparent;
+        /* 修改为顶部透明 */
+        border-bottom: 3px solid transparent;
+        /* 修改为底部透明 */
+        border-left: 4px solid @click-color;
+        /* 将有颜色的边设置为左侧，形成向右的箭头 */
 
         margin-top: -2px;
         top: 0px;

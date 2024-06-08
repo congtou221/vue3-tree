@@ -1,27 +1,30 @@
-import { VueElement, reactive } from "vue"
-import { TreeNode } from "./Tree/src/treeModel"
+import { VueElement, reactive } from "vue";
+import { TreeNode } from "./Tree/src/treeModel";
+import { ITreeNodeInstance } from "typings/treeComponent";
 
 type EnhancedVueElement<T> = VueElement & {
-  model: TreeNode // 替换'any'为modal的实际类型
-}
+  model: ITreeNodeInstance; // 替换'any'为modal的实际类型
+};
 
 // 然后，你可以定义CompInOperationType为增强后的VueElement或null
-export type CompInOperationType = EnhancedVueElement<Record<string, any>> | null
+export type CompInOperationType = EnhancedVueElement<
+  Record<string, any>
+> | null;
 interface StoreData {
-  compInOperation: CompInOperationType
-  activatedKey: number
-  showMenuCardId: number | null
-  showAddCardId: number | null
-  isDragging: number
-  wholeTreeNode: TreeNode | null
-  operationExpanded: boolean
-  setComInOperation: (comp: CompInOperationType) => void
-  setActivatedKey: (key: number) => void
-  setShowMenuCardId: (id: number | null) => void
-  setShowAddCardId: (id: number | null) => void
-  setDragging: (isDragging: number) => void
-  setWholeTreeNode: (tree: TreeNode) => void
-  setComInOperationExpaned: (expanded: boolean) => void
+  compInOperation: CompInOperationType;
+  activatedKey: number;
+  showMenuCardId: number | null;
+  showAddCardId: number | null;
+  isDragging: number;
+  wholeTreeNode: TreeNode | null;
+  operationExpanded: boolean;
+  setComInOperation: (comp: CompInOperationType) => void;
+  setActivatedKey: (key: number) => void;
+  setShowMenuCardId: (id: number | null) => void;
+  setShowAddCardId: (id: number | null) => void;
+  setDragging: (isDragging: number) => void;
+  setWholeTreeNode: (tree: TreeNode) => void;
+  setComInOperationExpaned: (expanded: boolean) => void;
 }
 
 const data: StoreData = {
@@ -33,27 +36,27 @@ const data: StoreData = {
   wholeTreeNode: null,
   operationExpanded: false,
   setComInOperation(comp: CompInOperationType) {
-    this.compInOperation = comp
+    this.compInOperation = comp;
   },
   setActivatedKey(key: number) {
-    this.activatedKey = key
+    this.activatedKey = key;
   },
   setShowMenuCardId(key: number | null) {
-    this.showMenuCardId = key
+    this.showMenuCardId = key;
   },
   setShowAddCardId(key: number | null) {
-    this.showAddCardId = key
+    this.showAddCardId = key;
   },
   setDragging(isDragging: number) {
-    this.isDragging = isDragging
+    this.isDragging = isDragging;
   },
   setWholeTreeNode(tree: TreeNode) {
-    this.wholeTreeNode = tree
+    this.wholeTreeNode = tree;
   },
   setComInOperationExpaned(expanded: boolean) {
-    this.operationExpanded = expanded
+    this.operationExpanded = expanded;
   },
-}
+};
 
-const store = reactive(data)
-export default store
+const store = reactive(data);
+export default store;
