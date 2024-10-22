@@ -4,7 +4,10 @@
       v-if="model.name !== 'root'"
       :id="`${model.id}`"
       class="vtl-node"
-      :class="{ 'vtl-leaf-node': model.isLeaf, 'vtl-tree-node': !model.isLeaf }"
+      :class="{
+        'vtl-leaf-node': !(model.children && model.children.length > 0),
+        'vtl-tree-node': model.children && model.children.length > 0,
+      }"
       @click="click"
     >
       <div
@@ -42,14 +45,14 @@
             @click.prevent.stop="toggle"
           />
         </span>
-        <span v-if="model.isLeaf">
-          <slot name="leafNodeIcon" :expanded="expanded" :model="model">
-            <i class="vtl-icon vtl-menu-icon vtl-icon-file" />
+        <span v-if="model.children && model.children.length > 0">
+          <slot name="treeNodeIcon" :expanded="expanded" :model="model">
+            <i class="vtl-icon vtl-menu-icon vtl-icon-folder" />
           </slot>
         </span>
         <span v-else>
-          <slot name="treeNodeIcon" :expanded="expanded" :model="model">
-            <i class="vtl-icon vtl-menu-icon vtl-icon-folder" />
+          <slot name="leafNodeIcon" :expanded="expanded" :model="model">
+            <i class="vtl-icon vtl-menu-icon vtl-icon-file" />
           </slot>
         </span>
         <div v-if="!editable" class="vtl-node-content">
@@ -86,7 +89,11 @@
             </slot>
           </span> -->
           <span
-            v-if="!model.addLeafNodeDisabled && !model.isLeaf"
+            v-if="
+              !model.addLeafNodeDisabled &&
+              model.children &&
+              model.children.length > 0
+            "
             :title="defaultAddLeafNodeTitle"
             @click.stop.prevent="showAdd()"
           >
@@ -256,11 +263,12 @@ import {
   computed,
   ref,
   reactive,
+  watch,
 } from "vue";
 import { TreeNode, removeHandler } from "./treeModel";
 import eventBus from "~/eventBus";
 import store, { CompInOperationType } from "~/store";
-import { ITreeNodeInstance } from "typings/treeComponent";
+import { ITreeNodeInstance, SlotProps } from "typings/treeComponent";
 import { isLastChildOfTree } from "~/utils";
 
 const props = defineProps<{
@@ -283,7 +291,7 @@ const emit = defineEmits([
   "drop-before",
   "drop-after",
 ]);
-const DefaultTreedNode = new TreeNode({ name: "root", isLeaf: false, id: 0 });
+const DefaultTreedNode = new TreeNode({ name: "root", id: 0 });
 const isHover = ref<boolean>(false);
 const editable = ref<boolean>(props.editable || false);
 
@@ -303,6 +311,15 @@ const asyncComponentReady = ref(false);
 const nodeInput = ref<HTMLInputElement | null>(null);
 
 let lastenter = ref<EventTarget | null>(null);
+
+watch(
+  () => props.model,
+  (newModel) => {
+    // Update the local model when props.model changes
+    Object.assign(model, newModel);
+  },
+  { immediate: true, deep: true }
+);
 
 const showExpandedUp = computed(() => {
   return (
@@ -625,7 +642,6 @@ const dragEnterBottomAnchor = (e: DragEvent) => {
 };
 const dragOverBottomAnchor = (e: DragEvent) => {
   e.preventDefault();
-
   return true;
 };
 const dragLeaveBottomAnchor = (e: DragEvent) => {
@@ -793,6 +809,10 @@ const saveWholeTreeNode = () => {
   }
 };
 
+const resetStore = () => {
+  store.setActivatedKey(Infinity);
+};
+
 onMounted(() => {
   saveWholeTreeNode();
   loadAsyncComponent();
@@ -802,11 +822,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   unregisterEventBusListeners();
   removeHandler(window, "keyup");
+  resetStore();
 });
 
 watchEffect(() => {
-  showActiveStyle.value =
-    !(model.disabled || model.dragDisabled) && model.id === store.activatedKey;
+  showActiveStyle.value = !model.disabled && model.id === store.activatedKey;
   showMenuCard.value =
     !(model.disabled || model.dragDisabled) &&
     model.id === store.showMenuCardId;
@@ -857,6 +877,7 @@ watchEffect(() => {
 }
 
 .vtl {
+  position: relative;
   .vtl-root {
     padding: 2px;
   }
@@ -1064,22 +1085,21 @@ watchEffect(() => {
   }
 
   .vtl-disabled {
-    color: @disable-color;
     &:hover {
-      cursor: not-allowed;
+      cursor: pointer;
     }
   }
   .vtl-disabled-darkmode {
     color: @dark-disable-color;
     &:hover {
-      cursor: not-allowed;
+      cursor: pointer;
     }
   }
   .vtl-drag-disabled,
   .vtl-disabled {
     .vtl-node-content {
       &:hover {
-        cursor: not-allowed;
+        cursor: pointer;
       }
     }
   }

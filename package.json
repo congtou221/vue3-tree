@@ -1,6 +1,6 @@
 {
   "name": "sailing-vuetree",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "private": false,
   "author": "sixiaohui",
   "description": "基于vue3的树形组件",

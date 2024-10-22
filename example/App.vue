@@ -1,7 +1,7 @@
 <template>
   <div>
     <button @click="addNode">Add Node</button>
-    <vue-tree :model="data">
+    <vue-tree :model="dataRef" @click="onClick">
       <!-- <vue-tree
       @click="onClick"
       @change-name="onChangeName"
@@ -16,12 +16,12 @@
       default-leaf-node-name="new leaf"
       v-bind:default-expanded="true"
     > -->
-      <template v-slot:leafNameDisplay="slotProps">
+      <!-- <template v-slot:leafNameDisplay="slotProps">
         <span>
           {{ slotProps.model.name }}
           <span class="muted">#{{ slotProps.model.id }}</span>
         </span>
-      </template>
+      </template> -->
       <!-- eslint-disable vue/no-unused-vars -->
       <!-- <template v-slot:addTreeNodeIcon="slotProps">
         <span class="icon">📂</span>
@@ -56,7 +56,7 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { getTreeData, TreeNode } from "~/Tree/src/treeModel";
 import VueTree from "~/Tree";
 import tree from "./tree.json";
@@ -93,7 +93,11 @@ const mockTree = [
 ];
 
 const newTree = ref({});
-const data = reactive(getTreeData(tree));
+const dataRef = ref(getTreeData({}, true));
+
+setTimeout(() => {
+  dataRef.value = getTreeData(tree, true);
+}, 1000);
 
 const onDel = (node) => {
   console.log("onDel", node);
@@ -129,7 +133,7 @@ const dropAfter = ({ node, src, target }) => {
 };
 
 const addNode = () => {
-  const node = new TreeNode({ name: "new node", isLeaf: false });
+  const node = new TreeNode({ name: "new node" });
   data.addChildren(node);
 };
 

@@ -59,7 +59,7 @@ export class TreeNode {
   id: number;
   parent: ITreeNodeInstance | null;
   children: ITreeNodeInstance[] | null;
-  isLeaf: boolean;
+  // isLeaf: boolean;
   name: string | undefined;
   pid: number | undefined;
   dragDisabled: boolean;
@@ -70,17 +70,17 @@ export class TreeNode {
   disabled: boolean;
   dragState!: IDragState;
 
-  constructor(data: TreeNodeData) {
-    const { id, isLeaf } = data;
+  constructor(data: TreeNodeData, allDisable?: boolean) {
+    const { id } = data;
     this.id = typeof id === "undefined" ? new Date().valueOf() : id;
     this.parent = null;
     this.children = null;
-    this.isLeaf = !!isLeaf;
-    this.dragDisabled = false;
-    this.addLeafNodeDisabled = false;
-    this.addTreeNodeDisabled = false;
-    this.editNodeDisabled = false;
-    this.delNodeDisabled = false;
+    // this.isLeaf = !!isLeaf;
+    this.dragDisabled = allDisable ?? false;
+    this.addLeafNodeDisabled = allDisable ?? false;
+    this.addTreeNodeDisabled = allDisable ?? false;
+    this.editNodeDisabled = allDisable ?? false;
+    this.delNodeDisabled = allDisable ?? false;
     this.disabled = false;
     this.dragState = {
       /**顶部锚点状态 */
@@ -176,9 +176,11 @@ export class TreeNode {
     }
 
     // cannot move to leaf node
-    if (target.isLeaf) {
-      return;
-    }
+    // Tip: every node can be moved into
+
+    // if (target.isLeaf) {
+    //   return;
+    // }
 
     this.parent?._removeChild(this);
     this.parent = target;
@@ -255,14 +257,17 @@ export class TreeNode {
  * Tree data model
  */
 
-export const getTreeData = (data: TreeNodeData[]): ITreeNodeInstance => {
-  const root = new TreeNode({ name: "root", isLeaf: false, id: 0 });
+export const getTreeData = (
+  data: TreeNodeData[],
+  allDisabled?: boolean
+): ITreeNodeInstance => {
+  const root = new TreeNode({ name: "root", id: 0 }, allDisabled);
 
   const initNode = (node: TreeNode, data: TreeNodeData[]) => {
     for (let i = 0, len = data.length; i < len; i++) {
       const _data = data[i];
 
-      const child = new TreeNode(_data);
+      const child = new TreeNode(_data, allDisabled);
       if (_data.children && _data.children.length > 0) {
         initNode(child, _data.children);
       }

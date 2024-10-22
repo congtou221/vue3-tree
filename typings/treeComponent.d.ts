@@ -24,7 +24,7 @@ export interface ITreeNodeInstance {
   id: number;
   parent: ITreeNodeInstance | null;
   children: ITreeNodeInstance[] | null;
-  isLeaf: boolean;
+  // isLeaf: boolean;
   name: string | undefined;
   pid: number | undefined;
   dragDisabled: boolean;
@@ -204,4 +204,7 @@ export interface IDragState {
 
   /** 节点内部 */
   isDragEnterNode: boolean; // 拖拽进入节点 ： 激活态
+}
+export interface SlotProps {
+  model: ITreeNodeInstance;
 }

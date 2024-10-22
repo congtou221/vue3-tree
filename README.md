@@ -16,19 +16,20 @@
 </template>
 <script lang="ts" setup>
 import { getTreeData, VueTree } from "sailing-vuetree";
-import type { ITreeNodeInstance, TreeNodeData } from 'sailing-vuetree/lib/typings';
+import type {
+  ITreeNodeInstance,
+  TreeNodeData,
+} from "sailing-vuetree/lib/typings";
 
 const mockTree: Array<TreeNodeData> = [
   {
     name: "Node 1",
     id: 1,
     pid: 0,
-    isLeaf: false,
     children: [
       {
         name: "Node 1-2",
         id: 2,
-        isLeaf: true,
         pid: 1,
       },
     ],
@@ -47,7 +48,6 @@ const mockTree: Array<TreeNodeData> = [
 ];
 const treeInstance: ITreeNodeInstance = getTreeData(mockTree);
 const mockData = reactive(treeInstance);
-
 </script>
 ```
 
